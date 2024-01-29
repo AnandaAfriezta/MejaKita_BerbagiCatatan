@@ -64,7 +64,7 @@ class CustomFloatingActionButton extends StatelessWidget {
           ),
         );
       },
-      backgroundColor: Colors.green,
+      backgroundColor: const Color(0xFF31B057),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(28.0),
       ),
@@ -128,29 +128,41 @@ class CardTemplate extends StatelessWidget {
                   children: [
                     Text(
                       cardData.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontFamily: 'Nunito',
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     Text(
                       cardData.sender,
                       style: const TextStyle(
                         fontFamily: 'Nunito',
                         fontSize: 16,
-                        color: Colors.grey,
+                        color: Color(0xFF2D6A4F),
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'Pages: ${cardData.pages}',
-                      style: const TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Image.asset(
+                          'assets/images/article.png',  // Gantilah dengan path yang sesuai dengan lokasi gambar Anda
+                          width: 30,
+                          height: 30,
+                        ),
+                        const SizedBox(width: 4),  // Jarak antara gambar dan teks
+                        Text(
+                          '${cardData.pages} Halaman',
+                          style: const TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 12,
+                            color: Color(0xFFA1A1A1),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -165,16 +177,34 @@ class CardTemplate extends StatelessWidget {
 
 final List<CardData> cardDataList = [
   CardData(
-    image: 'assets/images/kerajinan.jpg',
-    title: 'Qwerty uiop asdf (ghjkl)',
-    sender: 'Atta',
-    pages: '100',
+    image: 'assets/images/epep.jpg',
+    title: 'Tutorial Jamsut EPEP Terbaru auto headshot 2024',
+    sender: 'Kairi_kumar40',
+    pages: '150',
   ),
   CardData(
     image: 'assets/images/kerajinan.jpg',
-    title: 'qq',
+    title: 'Kerajinan Bahan Dari Alam',
     sender: 'budi',
-    pages: '50',
+    pages: '7',
+  ),
+  CardData(
+    image: 'assets/images/pohon.jpg',
+    title: 'Tata Cara Menanam Pohon',
+    sender: 'cintaalam',
+    pages: '12',
+  ),
+  CardData(
+    image: 'assets/images/saklar.png',
+    title: 'Tutorial menyalakan lampu paling efektif, 5 Menit belajar langsung bisa',
+    sender: 'asikin_NasiJagung',
+    pages: '4',
+  ),
+  CardData(
+    image: 'assets/images/ow.png',
+    title: 'MATEMATIKA Kelas 14 buat yang ngulang semester',
+    sender: 'pintarbersama',
+    pages: '5',
   ),
   // Add more data as needed
 ];

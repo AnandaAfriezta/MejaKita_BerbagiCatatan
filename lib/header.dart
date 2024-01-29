@@ -6,7 +6,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 40),
       child: Column(
         children: [
           Row(
@@ -34,7 +34,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                         fontFamily: 'Nunito',
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: Color(0xFF31B057),
                       ),
                     ),
                   ),
@@ -78,8 +78,8 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                   // Add logic for the search button here
                 },
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(40, 53), // Set the desired height
-                  backgroundColor: Colors.green,
+                  minimumSize: const Size(40, 45), // Set the desired height
+                  backgroundColor: const Color(0xFF31B057),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
