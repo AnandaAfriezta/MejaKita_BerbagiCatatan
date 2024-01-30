@@ -15,9 +15,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: CustomBody(),
-        floatingActionButton: CustomFloatingActionButton(), // Tambahkan ini
-        floatingActionButtonLocation: FloatingActionButtonLocation
-            .endFloat, // Sesuaikan lokasi floating action button
+        floatingActionButton: CustomFloatingActionButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
     );
   }
@@ -32,7 +31,83 @@ class CustomBody extends StatelessWidget {
       children: [
         const CustomHeader(),
         const SizedBox(height: 10),
-
+        // SearchBar ditambahkan di sini dengan margin
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  constraints: const BoxConstraints(
+                    minHeight: 40, // Set the desired height
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey[100],
+                  ),
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Search catatan...',
+                      hintStyle: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 16.0,
+                        fontStyle: FontStyle.normal,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.grey,
+                      ),
+                      icon: Icon(Icons.search),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              InkWell(
+                onTap: () {
+                  // Tambahkan logika untuk tombol cari di sini
+                },
+                child: Ink(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: const Color(0xFF31B057),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0xFF237D3E),
+                        offset: Offset(0, 4),
+                        blurRadius: 0,
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: InkWell(
+                    splashColor: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      // Tambahkan logika untuk tombol cari di sini
+                    },
+                    child: const SizedBox(
+                      height: 45,
+                      width: 80,
+                      child: Center(
+                        child: Text(
+                          'Cari',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -54,27 +129,46 @@ class CustomFloatingActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: () {
-        // Tambahkan logika untuk pindah ke halaman AddCatatanPage
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const AddCatatanPage(),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: const Color(0xFF31B057),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF237D3E).withOpacity(1.0),
+            offset: const Offset(0, 4),
+            blurRadius: 0,
+            spreadRadius: 0,
           ),
-        );
-      },
-      backgroundColor: const Color(0xFF31B057),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(28.0),
+        ],
       ),
-      child: const Icon(
-        Icons.add,
-        color: Colors.white,
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(28.0), // Menyesuaikan dengan bentuk FAB
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AddCatatanPage(),
+              ),
+            );
+          },
+          child: const Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
+          ),
+        ),
       ),
     );
   }
 }
+
 
 class CardData {
   final String image;
@@ -149,11 +243,11 @@ class CardTemplate extends StatelessWidget {
                     Row(
                       children: [
                         Image.asset(
-                          'assets/images/article.png',  // Gantilah dengan path yang sesuai dengan lokasi gambar Anda
+                          'assets/images/article.png',
                           width: 30,
                           height: 30,
                         ),
-                        const SizedBox(width: 4),  // Jarak antara gambar dan teks
+                        const SizedBox(width: 4),
                         Text(
                           '${cardData.pages} Halaman',
                           style: const TextStyle(

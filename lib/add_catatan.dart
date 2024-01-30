@@ -83,7 +83,8 @@ class AddCatatanPage extends StatelessWidget {
                     // Tambahkan fungsi untuk memilih file di sini
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16), backgroundColor: const Color(0xFFF3F4F6),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: const Color(0xFFF3F4F6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -152,18 +153,13 @@ class AddCatatanPage extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Tags',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF9CA3AF),
-                  ),
-                ),
-                const SizedBox(height: 8),
                 TextField(
                   decoration: InputDecoration(
+                    prefixIcon: Image.asset(
+                      'assets/images/tag.png',
+                      width: 17,
+                      height: 17,
+                    ),
                     hintText: 'Ketikkan Tags',
                     hintStyle: const TextStyle(
                       fontFamily: 'Nunito',
@@ -179,6 +175,7 @@ class AddCatatanPage extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 8),
               ],
             ),
             const SizedBox(height: 16),
@@ -193,53 +190,68 @@ class AddCatatanPage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Tombol Batal
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(40, 53),
-                  backgroundColor: Colors.grey[200],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 4,
-                  shadowColor: Colors.grey[400],
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: const [
+                    BoxShadow(
+                      offset: Offset(0, 4),
+                      blurRadius: 0,
+                      spreadRadius: 0,
+                      color: Color(0xFFE2E2E2),// Warna shadow
+                    ),
+                  ],
+                  color: const Color(0xFFF5F5F5), // Warna background
                 ),
-                child: const Text(
-                  'Batal',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16.0,
-                    color: Colors.black,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Batal',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16.0,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ),
 
-              // Tombol Unggah Catatan
-              ElevatedButton(
-                onPressed: () {
-                  // Tambahkan logika untuk mengunggah catatan
-                  // Anda dapat menambahkan pemrosesan data atau logika lainnya di sini
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(40, 53),
-                  backgroundColor: const Color(0xFF31B057),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 4,
-                  shadowColor: const Color(0xFF1E8449),
+              // AnimatedContainer untuk Button Unggah Catatan
+
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: const [
+                    BoxShadow(
+                      offset: Offset(0, 4),
+                      blurRadius: 0,
+                      spreadRadius: 0,
+                      color: Color(0xFF237D3E),// Warna shadow
+                    ),
+                  ],
+                  color: const Color(0xFF31B057), // Warna background
                 ),
-                child: const Text(
-                  'Unggah Catatan',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16.0,
-                    color: Colors.white,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Unggah Catatan',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16.0,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
