@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
-  const CustomHeader({Key? key}) : super(key: key);
+  final bool isHomePage;
+
+  const CustomHeader({Key? key, required this.isHomePage}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +18,16 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   IconButton(
                     onPressed: () {
-                      // Add navigation logic to the previous page here
+                      if (isHomePage) {
+                        // Add navigation logic to the previous page here
+                      } else {
+                        // Add navigation logic to go back here
+                        Navigator.pop(context);
+                      }
                     },
-                    icon: const Icon(Icons.home),
+                    icon: isHomePage
+                        ? const Icon(Icons.home)
+                        : const Icon(Icons.arrow_back),
                   ),
                   const SizedBox(width: 10),
                   Image.asset(

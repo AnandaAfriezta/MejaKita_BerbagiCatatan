@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_catatan.dart';
 import 'header.dart';
+import 'detail_catatan.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +30,7 @@ class CustomBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const CustomHeader(),
+        const CustomHeader(isHomePage: true,),
         const SizedBox(height: 10),
         // SearchBar ditambahkan di sini dengan margin
         Padding(
@@ -199,6 +200,15 @@ class CardTemplate extends StatelessWidget {
       child: Card(
         color: Colors.white,
         elevation: 0,
+        child: InkWell(
+        onTap: (){
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DetailCatatanPage(),
+        ),
+      );
+    },
         child: Padding(
           padding: const EdgeInsets.all(0),
           child: Row(
@@ -264,6 +274,7 @@ class CardTemplate extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
