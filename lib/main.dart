@@ -65,7 +65,7 @@ class CustomBody extends StatelessWidget {
               const SizedBox(width: 10),
               InkWell(
                 onTap: () {
-                  // Tambahkan logika untuk tombol cari di sini
+
                 },
                 child: Ink(
                   decoration: BoxDecoration(
@@ -147,7 +147,8 @@ class CustomFloatingActionButton extends StatelessWidget {
         color: Colors.transparent,
         shape: const CircleBorder(),
         child: InkWell(
-          borderRadius: BorderRadius.circular(28.0), // Menyesuaikan dengan bentuk FAB
+          borderRadius: BorderRadius.circular(28.0),
+          // Menyesuaikan dengan bentuk FAB
           onTap: () {
             Navigator.push(
               context,
@@ -168,7 +169,6 @@ class CustomFloatingActionButton extends StatelessWidget {
     );
   }
 }
-
 
 class CardData {
   final String image;
@@ -290,7 +290,8 @@ final List<CardData> cardDataList = [
   ),
   CardData(
     image: 'assets/images/saklar.png',
-    title: 'Tutorial menyalakan lampu paling efektif, 5 Menit belajar langsung bisa',
+    title:
+        'Tutorial menyalakan lampu paling efektif, 5 Menit belajar langsung bisa',
     sender: 'asikin_NasiJagung',
     pages: '4',
   ),

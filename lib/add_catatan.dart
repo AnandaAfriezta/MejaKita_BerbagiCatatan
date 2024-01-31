@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'header_add.dart';
+import 'header.dart';
 
 class AddCatatanPage extends StatelessWidget {
   const AddCatatanPage({Key? key}) : super(key: key);
@@ -7,8 +7,7 @@ class AddCatatanPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const HeaderAdd(),
-      backgroundColor: Colors.white,
+      appBar: const CustomHeader(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -184,79 +183,94 @@ class AddCatatanPage extends StatelessWidget {
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
-        elevation: 0,
-        child: Container(
-          color: Colors.white,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+
+            //Button Batal
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Ink(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFFF5F5F5),
                   boxShadow: const [
                     BoxShadow(
+                      color: Color(0xFFE2E2E2),
                       offset: Offset(0, 4),
                       blurRadius: 0,
                       spreadRadius: 0,
-                      color: Color(0xFFE2E2E2),// Warna shadow
                     ),
                   ],
-                  color: const Color(0xFFF5F5F5), // Warna background
                 ),
-                child: GestureDetector(
+                child: InkWell(
+                  splashColor: Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
                   onTap: () {
                     Navigator.pop(context);
                   },
-                  child: const Text(
-                    'Batal',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16.0,
-                      color: Colors.black,
+                  child: const SizedBox(
+                    height: 45,
+                    width: 80,
+                    child: Center(
+                      child: Text(
+                        'Batal',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
+            ),
 
-              // AnimatedContainer untuk Button Unggah Catatan
-
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            //Button Unggah Catatan
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Ink(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFF31B057),
                   boxShadow: const [
                     BoxShadow(
+                      color: Color(0xFF237D3E),
                       offset: Offset(0, 4),
                       blurRadius: 0,
                       spreadRadius: 0,
-                      color: Color(0xFF237D3E),// Warna shadow
                     ),
                   ],
-                  color: const Color(0xFF31B057), // Warna background
                 ),
-                child: GestureDetector(
+                child: InkWell(
+                  splashColor: Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
                   onTap: () {
                     Navigator.pop(context);
                   },
-                  child: const Text(
-                    'Unggah Catatan',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16.0,
-                      color: Colors.white,
+                  child: const SizedBox(
+                    height: 45,
+                    width: 150,
+                    child: Center(
+                      child: Text(
+                        'Unggah Catatan',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
