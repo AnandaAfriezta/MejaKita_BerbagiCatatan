@@ -27,7 +27,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomHeader(),
+      appBar: const CustomHeader(isHomePage: false),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
