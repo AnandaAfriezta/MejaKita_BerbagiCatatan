@@ -1,8 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'header.dart';
 
-class AddCatatanPage extends StatelessWidget {
+class AddCatatanPage extends StatefulWidget {
   const AddCatatanPage({Key? key}) : super(key: key);
+
+  @override
+  _AddCatatanPageState createState() => _AddCatatanPageState();
+}
+
+class _AddCatatanPageState extends State<AddCatatanPage> {
+  File? _selectedImage;
+
+  Future<void> _selectImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +33,6 @@ class AddCatatanPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Label dan Input Judul Catatan
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -41,7 +60,6 @@ class AddCatatanPage extends StatelessWidget {
                         height: 17,
                       ),
                       const SizedBox(width: 16.0),
-                      // Jarak antara gambar dan teks
                       const Expanded(
                         child: TextField(
                           decoration: InputDecoration(
@@ -63,7 +81,6 @@ class AddCatatanPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Label dan Input File Gambar Catatan
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -78,9 +95,7 @@ class AddCatatanPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton(
-                  onPressed: () {
-                    // Tambahkan fungsi untuk memilih file di sini
-                  },
+                  onPressed: _selectImage,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: const Color(0xFFF3F4F6),
@@ -108,11 +123,15 @@ class AddCatatanPage extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (_selectedImage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Image.file(_selectedImage!),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
 
-            // Label dan Input Deskripsi Catatan
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -148,7 +167,6 @@ class AddCatatanPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Label dan Input Tags
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -186,8 +204,6 @@ class AddCatatanPage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-
-            //Button Batal
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -229,7 +245,6 @@ class AddCatatanPage extends StatelessWidget {
               ),
             ),
 
-            //Button Unggah Catatan
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
