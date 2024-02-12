@@ -26,11 +26,11 @@ class _YourContentWidgetState extends State<YourContentWidget> {
     'assets/images/img_1.png',
     'assets/images/img_2.png',
     'assets/images/img_3.png',
+    'assets/images/img_1.png',
+    'assets/images/img_2.png',
     'assets/images/img_3.png',
-    'assets/images/img_3.png',
-    'assets/images/img_3.png',
-    'assets/images/img_3.png',
-    'assets/images/img_3.png',
+    'assets/images/img_1.png',
+    'assets/images/img_2.png',
     'assets/images/img_3.png',
   ];
 
@@ -40,7 +40,7 @@ class _YourContentWidgetState extends State<YourContentWidget> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: currentPage);
+    _pageController = PageController(initialPage: currentPage, viewportFraction: 1.0);
   }
 
   @override
@@ -53,6 +53,11 @@ class _YourContentWidgetState extends State<YourContentWidget> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        double screenWidth = MediaQuery.of(context).size.width;
+        double aspectRatio = screenWidth > 640 ? 1.41 / 1 : 1 / 1.41;
+
+        int visibleImages = screenWidth > 640 ? 2 : 1; // Menentukan jumlah gambar yang terlihat
+
         return SingleChildScrollView(
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -65,9 +70,9 @@ class _YourContentWidgetState extends State<YourContentWidget> {
                   alignment: Alignment.center,
                   children: [
                     AspectRatio(
-                      aspectRatio: 1 / 1.41,
+                      aspectRatio: aspectRatio,
                       child: PageView.builder(
-                        itemCount: imageUrls.length,
+                        itemCount: screenWidth > 640 ? imageUrls.length - 1 : imageUrls.length,
                         controller: _pageController,
                         onPageChanged: (index) {
                           setState(() {
@@ -75,17 +80,27 @@ class _YourContentWidgetState extends State<YourContentWidget> {
                           });
                         },
                         itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              _showFullScreenImage(context, index);
-                            },
-                            child: Hero(
-                              tag: 'image-$index',
-                              child: Image.asset(
-                                imageUrls[index],
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                          return Row(
+                            children: [
+                              for (int i = 0; i < visibleImages; i++)
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      _showFullScreenImage(context, index + i);
+                                    },
+                                    child: Hero(
+                                      tag: 'image-${index + i}',
+                                      child: Transform.scale(
+                                        scale: index == currentPage ? 1.0 : 0.5,
+                                        child: Image.asset(
+                                          imageUrls[index + i],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           );
                         },
                       ),
@@ -143,6 +158,7 @@ class _YourContentWidgetState extends State<YourContentWidget> {
     );
   }
 }
+
 
 class CollapsibleDescription extends StatefulWidget {
   @override
@@ -274,7 +290,7 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
 
   void _updateIndicatorPosition() {
     setState(() {
-      indicatorPosition = widget.pageController.page!;
+      indicatorPosition = widget.pageController.page!.clamp(0.0, widget.itemCount - 1.0);
     });
   }
 
@@ -283,6 +299,9 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
     double indicatorWidth = 50.0;
     double padding = 5.0;
 
+    // Sesuaikan itemCount agar sesuai dengan jumlah gambar yang ditampilkan
+    int adjustedItemCount = widget.itemCount;
+
     return Container(
       height: 70.0,
       child: Center(
@@ -290,17 +309,25 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
           width: MediaQuery.of(context).size.width,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: widget.itemCount,
+            itemCount: adjustedItemCount,
             itemBuilder: (context, index) {
+              bool isLastImage = index == adjustedItemCount;
+
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: padding),
                 child: GestureDetector(
                   onTap: () {
-                    widget.pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
+                    // Jika mengklik indicator gambar terakhir, pindahkan ke halaman terakhir tanpa animasi
+                    if (isLastImage) {
+                      widget.pageController.jumpToPage(adjustedItemCount - 1);
+                    } else {
+                      // Jika mengklik indicator lainnya, animasikan seperti biasa
+                      widget.pageController.animateToPage(
+                        index,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    }
                   },
                   child: Container(
                     width: indicatorWidth,
@@ -309,7 +336,9 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
                       shape: BoxShape.rectangle,
                       borderRadius: BorderRadius.circular(5.0),
                       border: Border.all(
-                        color: index == widget.currentPage ? Colors.green : Colors.white,
+                        color: (indicatorPosition - (isLastImage ? adjustedItemCount - 1.0 : index)).abs() < 0.5
+                            ? Colors.green
+                            : Colors.white,
                         width: 2.0,
                       ),
                       image: DecorationImage(
