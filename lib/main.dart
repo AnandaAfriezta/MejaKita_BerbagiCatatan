@@ -50,7 +50,7 @@ class CustomBody extends StatelessWidget {
                   child: const TextField(
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: 'Search catatan...',
+                      hintText: 'Cari catatan...',
                       hintStyle: TextStyle(
                         fontFamily: 'Nunito',
                         fontSize: 16.0,
@@ -65,9 +65,7 @@ class CustomBody extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               InkWell(
-                onTap: () {
-
-                },
+                onTap: () {},
                 child: Ink(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
@@ -110,12 +108,31 @@ class CustomBody extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: cardDataList.length,
-            itemBuilder: (context, index) {
-              return CardTemplate(
-                cardData: cardDataList[index],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return constraints.maxWidth > 600
+                  ? GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16.0,
+                  mainAxisSpacing: 16.0,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: cardDataList.length,
+                itemBuilder: (context, index) {
+                  return CardTemplate(
+                    cardData: cardDataList[index],
+                  );
+                },
+              )
+                  : ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: cardDataList.length,
+                itemBuilder: (context, index) {
+                  return CardTemplate(
+                    cardData: cardDataList[index],
+                  );
+                },
               );
             },
           ),
@@ -201,84 +218,86 @@ class CardTemplate extends StatelessWidget {
         color: Colors.white,
         elevation: 0,
         child: InkWell(
-        onTap: (){
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DetailCatatanPage(),
-        ),
-      );
-    },
-        child: Padding(
-          padding: const EdgeInsets.all(0),
-          child: Row(
-            children: [
-              Container(
-                width: 100,
-                height: 175,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  image: DecorationImage(
-                    image: AssetImage(cardData.image),
-                    fit: BoxFit.cover,
-                  ),
-                ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailCatatanPage(),
               ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      cardData.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+            );
+          },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Row(
+                children: [
+                  Container(
+                    width: 100,
+                    height: 175,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: AssetImage(cardData.image),
+                        fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      cardData.sender,
-                      style: const TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 16,
-                        color: Color(0xFF2D6A4F),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset(
-                          'assets/images/article.png',
-                          width: 30,
-                          height: 30,
-                        ),
-                        const SizedBox(width: 4),
                         Text(
-                          '${cardData.pages} Halaman',
+                          cardData.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontFamily: 'Nunito',
-                            fontSize: 12,
-                            color: Color(0xFFA1A1A1),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          cardData.sender,
+                          style: const TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 16,
+                            color: Color(0xFF2D6A4F),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Image.asset(
+                              'assets/images/article.png',
+                              width: 30,
+                              height: 30,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${cardData.pages} Halaman',
+                              style: const TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 12,
+                                color: Color(0xFFA1A1A1),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+                ],
+              );
+            },
           ),
         ),
-      ),
       ),
     );
   }
 }
+
 
 final List<CardData> cardDataList = [
   CardData(
@@ -301,8 +320,7 @@ final List<CardData> cardDataList = [
   ),
   CardData(
     image: 'assets/images/saklar.png',
-    title:
-        'Tutorial menyalakan lampu paling efektif, 5 Menit belajar langsung bisa',
+    title: 'Tutorial menyalakan lampu paling efektif, 5 Menit belajar langsung bisa',
     sender: 'asikin_NasiJagung',
     pages: '4',
   ),
@@ -312,5 +330,6 @@ final List<CardData> cardDataList = [
     sender: 'pintarbersama',
     pages: '5',
   ),
-  // Add more data as needed
+  // Tambahkan data lebih banyak jika diperlukan
 ];
+
