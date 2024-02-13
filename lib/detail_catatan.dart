@@ -24,15 +24,7 @@ class YourContentWidget extends StatefulWidget {
 }
 
 class _YourContentWidgetState extends State<YourContentWidget> {
-  List<String> imageUrls = [];
-  String catatanTitle = '';
-  String summary = '';
-  String ownerName = '';
-  String Description = '';
-  List<String> tag = [];
-  String avatarUrl = '';
-
-
+  late Future<CatatanData> catatanDataFuture;
   int currentPage = 0;
   late PageController _pageController;
 
@@ -40,7 +32,7 @@ class _YourContentWidgetState extends State<YourContentWidget> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: currentPage, viewportFraction: 1.0);
-    fetchDataUrls(); // Fetch image URLs when the widget is initialized
+    catatanDataFuture = fetchDataUrls();
   }
 
   @override
@@ -49,23 +41,14 @@ class _YourContentWidgetState extends State<YourContentWidget> {
     super.dispose();
   }
 
-  // Function to fetch image URLs from the API
-  Future<void> fetchDataUrls() async {
+  // Function to fetch data from the API
+  Future<CatatanData> fetchDataUrls() async {
     final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/fastabiqul-khairat');
 
     final response = await http.get(apiUrl);
     if (response.statusCode == 200) {
-      final Map<String, dynamic> catatanData = json.decode(response.body)['data']['catatanData'];
-      setState(() {
-        // Extract 'image_url' from each item in the 'images' list
-        imageUrls = List<String>.from(catatanData['images'].map((item) => item['image_url']));
-        catatanTitle = catatanData['title'];
-        summary = catatanData['summary'];
-        ownerName = catatanData['owner']['name'];
-        Description = catatanData['description'];
-        tag = List<String>.from(catatanData['tag']);
-        avatarUrl = catatanData['owner']['photo_url'];
-      });
+      final Map<String, dynamic> responseData = json.decode(response.body)['data'];
+      return CatatanData.fromJson(responseData['catatanData']);
     } else {
       throw Exception('Failed to load Data');
     }
@@ -73,94 +56,116 @@ class _YourContentWidgetState extends State<YourContentWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double screenWidth = MediaQuery.of(context).size.width;
-        double aspectRatio = screenWidth > 640 ? 1.41 / 1 : 1 / 1.41;
-
-        int visibleImages = screenWidth > 640 ? 2 : 1; // Menentukan jumlah gambar yang terlihat
-
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: constraints.maxHeight,
+    return FutureBuilder(
+      future: catatanDataFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Menampilkan widget loading ketika data masih diambil
+          return Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    AspectRatio(
-                      aspectRatio: aspectRatio,
-                      child: PageView.builder(
-                        itemCount: screenWidth > 640 ? imageUrls.length - 1 : imageUrls.length,
-                        controller: _pageController,
-                        onPageChanged: (index) {
-                          setState(() {
-                            currentPage = index;
-                          });
-                        },
-                        itemBuilder: (context, index) {
-                          return Row(
-                            children: [
-                              for (int i = 0; i < visibleImages; i++)
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      _showFullScreenImage(context, index + i);
-                                    },
-                                    child: Hero(
-                                      tag: 'image-${index + i}',
-                                        child: Image.network(
-                                          imageUrls[index + i], // Use Image.network for remote images
-                                          fit: BoxFit.cover,
+          );
+        } else if (snapshot.hasError) {
+          // Menampilkan pesan kesalahan jika terjadi kesalahan dalam pengambilan data
+          return Center(
+            child: Text('Error: ${snapshot.error}'),
+          );
+        } else {
+          // Data sudah diambil, tampilkan konten utama
+          final CatatanData catatanData = snapshot.data as CatatanData;
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              double screenWidth = MediaQuery.of(context).size.width;
+              double aspectRatio = screenWidth > 640 ? 1.41 / 1 : 1 / 1.41;
+
+              int visibleImages = screenWidth > 640 ? 2 : 1;
+
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          AspectRatio(
+                            aspectRatio: aspectRatio,
+                            child: PageView.builder(
+                              itemCount: screenWidth > 640 ? catatanData.images.length - 1 : catatanData.images.length,
+                              controller: _pageController,
+                              onPageChanged: (index) {
+                                setState(() {
+                                  currentPage = index;
+                                });
+                              },
+                              itemBuilder: (context, index) {
+                                return Row(
+                                  children: [
+                                    for (int i = 0; i < visibleImages; i++)
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            _showFullScreenImage(context, index + i);
+                                          },
+                                          child: Hero(
+                                            tag: 'image-${index + i}',
+                                            child: buildImageWithFallback(
+                                              catatanData.images[index + i].imageUrl,
+                                              catatanData.images[index + i].imagePreview,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                            ],
-                          );
-                        },
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                CustomPageIndicator(
-                  itemCount: imageUrls.length,
-                  currentPage: currentPage,
-                  pageController: _pageController,
-                  imageUrls: imageUrls,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  catatanTitle,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontFamily: 'Nunito',
-                    fontWeight: FontWeight.bold,
+                      const SizedBox(height: 10),
+                      CustomPageIndicator(
+                        itemCount: catatanData.images.length,
+                        currentPage: currentPage,
+                        pageController: _pageController,
+                        imageUrls: catatanData.images.map((image) => image.imageUrl).toList(),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        catatanData.title,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontFamily: 'Nunito',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      CollapsibleDescription(summary: catatanData.summary),
+                      const SizedBox(height: 10),
+                      AccountInfoWidget(ownerName: catatanData.owner.name, avatarUrl: catatanData.owner.photoUrl),
+                      const SizedBox(height: 10),
+                      Text(
+                        catatanData.description,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Nunito',
+                          color: Color(0xFFA1A1A1),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Tag(tags: catatanData.tag),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 10),
-                CollapsibleDescription(summary: summary,),
-                const SizedBox(height: 10),
-                AccountInfoWidget(ownerName: ownerName, avatarUrl: avatarUrl,),
-                const SizedBox(height: 10),
-                Text(
-                  Description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontFamily: 'Nunito',
-                    color: Color(0xFFA1A1A1),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Tag(tags: tag),
-              ],
-            ),
-          ),
-        );
+              );
+            },
+          );
+        }
       },
     );
   }
@@ -170,11 +175,75 @@ class _YourContentWidgetState extends State<YourContentWidget> {
       context,
       MaterialPageRoute(
         builder: (context) => FullScreenImageView(
-          imageUrls: imageUrls,
+          imageUrlsFuture: catatanDataFuture.then((data) => data.images.map((image) => image.imageUrl).toList()),
           initialIndex: index,
         ),
       ),
     );
+  }
+
+  Widget buildImageWithFallback(String imageUrl, String fallbackUrl) {
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Image.network(
+          fallbackUrl,
+          fit: BoxFit.cover,
+        );
+      },
+    );
+  }
+}
+
+class CatatanData {
+  late String title;
+  late String summary;
+  late String description;
+  late Owner owner;
+  late List<ImageData> images;
+  late List<String> tag;
+
+  CatatanData({
+    required this.title,
+    required this.summary,
+    required this.description,
+    required this.owner,
+    required this.images,
+    required this.tag,
+  });
+
+  CatatanData.fromJson(Map<String, dynamic> json) {
+    title = json['title'];
+    summary = json['summary'];
+    description = json['description'];
+    owner = Owner.fromJson(json['owner']);
+    images = List<ImageData>.from(json['images'].map((item) => ImageData.fromJson(item)));
+    tag = List<String>.from(json['tag']);
+  }
+}
+
+class Owner {
+  late String name;
+  late String photoUrl;
+
+  Owner({required this.name, required this.photoUrl});
+
+  Owner.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    photoUrl = json['photo_url'];
+  }
+}
+
+class ImageData {
+  late String imageUrl;
+  late String imagePreview;
+
+  ImageData({required this.imageUrl, required this.imagePreview});
+
+  ImageData.fromJson(Map<String, dynamic> json) {
+    imageUrl = json['image_url'];
+    imagePreview = json['image_preview'];
   }
 }
 
@@ -215,7 +284,7 @@ class _CollapsibleDescriptionState extends State<CollapsibleDescription> {
                     ),
                     const SizedBox(width: 8),
                     Image.asset(
-                      'assets/images/img_5.png',
+                      'assets/images/mejakittyai.png',
                       width: 16,
                       height: 16,
                     ),
@@ -386,54 +455,75 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
 }
 
 class FullScreenImageView extends StatelessWidget {
-  final List<String> imageUrls; // Pass imageUrls as a parameter
+  final Future<List<String>> imageUrlsFuture; // Change to Future<List<String>> type
   final int initialIndex;
 
-  FullScreenImageView({required this.imageUrls, required this.initialIndex});
+  FullScreenImageView({required this.imageUrlsFuture, required this.initialIndex});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          PhotoViewGallery.builder(
-            itemCount: imageUrls.length,
-            builder: (context, index) {
-              return PhotoViewGalleryPageOptions(
-                imageProvider: NetworkImage(imageUrls[index]), // Use NetworkImage for API images
-                minScale: PhotoViewComputedScale.contained,
-                maxScale: PhotoViewComputedScale.covered * 2,
-              );
-            },
-            scrollPhysics: const BouncingScrollPhysics(),
-            backgroundDecoration: const BoxDecoration(
-              color: Colors.black,
+    return FutureBuilder(
+      future: imageUrlsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
             ),
-            pageController: PageController(initialPage: initialIndex),
-          ),
-          Positioned(
-            top: 40.0,
-            left: 10.0,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black.withOpacity(0.5),
-                ),
-                child: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 20.0,
-                ),
-              ),
+          );
+        } else if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Text('Error: ${snapshot.error}'),
             ),
-          ),
-        ],
-      ),
+          );
+        } else {
+          final List<String> imageUrls = snapshot.data as List<String>;
+
+          return Scaffold(
+            body: Stack(
+              children: [
+                PhotoViewGallery.builder(
+                  itemCount: imageUrls.length,
+                  builder: (context, index) {
+                    return PhotoViewGalleryPageOptions(
+                      imageProvider: NetworkImage(imageUrls[index]),
+                      minScale: PhotoViewComputedScale.contained,
+                      maxScale: PhotoViewComputedScale.covered * 2,
+                    );
+                  },
+                  scrollPhysics: const BouncingScrollPhysics(),
+                  backgroundDecoration: const BoxDecoration(
+                    color: Colors.black,
+                  ),
+                  pageController: PageController(initialPage: initialIndex),
+                ),
+                Positioned(
+                  top: 40.0,
+                  left: 10.0,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 20.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+      },
     );
   }
 }
