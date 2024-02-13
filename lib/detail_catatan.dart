@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'header.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class DetailCatatanPage extends StatelessWidget {
   @override
@@ -22,17 +24,14 @@ class YourContentWidget extends StatefulWidget {
 }
 
 class _YourContentWidgetState extends State<YourContentWidget> {
-  List<String> imageUrls = [
-    'assets/images/img_1.png',
-    'assets/images/img_2.png',
-    'assets/images/img_3.png',
-    'assets/images/img_1.png',
-    'assets/images/img_2.png',
-    'assets/images/img_3.png',
-    'assets/images/img_1.png',
-    'assets/images/img_2.png',
-    'assets/images/img_3.png',
-  ];
+  List<String> imageUrls = [];
+  String catatanTitle = '';
+  String summary = '';
+  String ownerName = '';
+  String Description = '';
+  List<String> tag = [];
+  String avatarUrl = '';
+
 
   int currentPage = 0;
   late PageController _pageController;
@@ -41,12 +40,35 @@ class _YourContentWidgetState extends State<YourContentWidget> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: currentPage, viewportFraction: 1.0);
+    fetchDataUrls(); // Fetch image URLs when the widget is initialized
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  // Function to fetch image URLs from the API
+  Future<void> fetchDataUrls() async {
+    final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/fastabiqul-khairat');
+
+    final response = await http.get(apiUrl);
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> catatanData = json.decode(response.body)['data']['catatanData'];
+      setState(() {
+        // Extract 'image_url' from each item in the 'images' list
+        imageUrls = List<String>.from(catatanData['images'].map((item) => item['image_url']));
+        catatanTitle = catatanData['title'];
+        summary = catatanData['summary'];
+        ownerName = catatanData['owner']['name'];
+        Description = catatanData['description'];
+        tag = List<String>.from(catatanData['tag']);
+        avatarUrl = catatanData['owner']['photo_url'];
+      });
+    } else {
+      throw Exception('Failed to load Data');
+    }
   }
 
   @override
@@ -90,16 +112,13 @@ class _YourContentWidgetState extends State<YourContentWidget> {
                                     },
                                     child: Hero(
                                       tag: 'image-${index + i}',
-                                      child: Transform.scale(
-                                        scale: index == currentPage ? 1.0 : 0.5,
-                                        child: Image.asset(
-                                          imageUrls[index + i],
+                                        child: Image.network(
+                                          imageUrls[index + i], // Use Image.network for remote images
                                           fit: BoxFit.cover,
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
                             ],
                           );
                         },
@@ -115,21 +134,21 @@ class _YourContentWidgetState extends State<YourContentWidget> {
                   imageUrls: imageUrls,
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'SISTEM PENCERNAAN MANUSIA - KELAS VIII',
-                  style: TextStyle(
+                Text(
+                  catatanTitle,
+                  style: const TextStyle(
                     fontSize: 24,
                     fontFamily: 'Nunito',
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 10),
-                CollapsibleDescription(),
+                CollapsibleDescription(summary: summary,),
                 const SizedBox(height: 10),
-                AccountInfoWidget(),
+                AccountInfoWidget(ownerName: ownerName, avatarUrl: avatarUrl,),
                 const SizedBox(height: 10),
-                const Text(
-                  'MATERI IPA ( BIOLOGI) SISTEM PENCERNAAN MANUSIA Kelas = 8 Semoga bermanfaat (0-0)',
+                Text(
+                  Description,
                   style: TextStyle(
                     fontSize: 12,
                     fontFamily: 'Nunito',
@@ -137,7 +156,7 @@ class _YourContentWidgetState extends State<YourContentWidget> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Tag(tags: ['#8 #IPA #pencernaan','IPA']),
+                Tag(tags: tag),
               ],
             ),
           ),
@@ -161,6 +180,10 @@ class _YourContentWidgetState extends State<YourContentWidget> {
 
 
 class CollapsibleDescription extends StatefulWidget {
+  final String summary;
+
+  CollapsibleDescription({required this.summary});
+
   @override
   _CollapsibleDescriptionState createState() => _CollapsibleDescriptionState();
 }
@@ -171,7 +194,7 @@ class _CollapsibleDescriptionState extends State<CollapsibleDescription> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16), // Add padding here
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -186,11 +209,11 @@ class _CollapsibleDescriptionState extends State<CollapsibleDescription> {
               children: [
                 Row(
                   children: [
-                    Text(
+                    const Text(
                       'Rangkuman by MejaKittyAI',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0096C7)),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Image.asset(
                       'assets/images/img_5.png',
                       width: 16,
@@ -206,7 +229,7 @@ class _CollapsibleDescriptionState extends State<CollapsibleDescription> {
           ),
           SizedBox(height: 8),
           Text(
-            'Berfungsi Mungunyah, menelan, mencerna makanan. Enzim petialit = Mengubah zat tepung ke glukosa. Berfungsi: Menghubungkan Fan mulut dengan lambung Membantu proses menelan makanan dan minuman.',
+            widget.summary, // Access shortDocs from the widget property
             style: TextStyle(fontSize: 12),
             maxLines: isExpanded ? 10000 : 2,
             overflow: TextOverflow.ellipsis,
@@ -219,21 +242,26 @@ class _CollapsibleDescriptionState extends State<CollapsibleDescription> {
 }
 
 class AccountInfoWidget extends StatelessWidget {
+  final String ownerName;
+  final String avatarUrl;
+
+  const AccountInfoWidget({super.key, required this.ownerName, required this.avatarUrl});
+
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         CircleAvatar(
           radius: 20,
           backgroundColor: Colors.grey,
-          backgroundImage: AssetImage('assets/images/profile.png'),
+          backgroundImage: NetworkImage(avatarUrl),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Dibagikan Oleh',
               style: TextStyle(
                   fontSize: 12,
@@ -242,8 +270,8 @@ class AccountInfoWidget extends StatelessWidget {
               ),
             ),
             Text(
-              'adeliastudy',
-              style: TextStyle(
+              ownerName,
+              style: const TextStyle(
                 fontFamily: 'Nunito',
                 fontWeight: FontWeight.bold,
               ),
@@ -260,7 +288,7 @@ class CustomPageIndicator extends StatefulWidget {
   final int itemCount;
   final int currentPage;
   final PageController pageController;
-  final List<String> imageUrls;
+  final List<String> imageUrls; // Pass imageUrls as a parameter
 
   CustomPageIndicator({
     required this.itemCount,
@@ -342,7 +370,7 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
                         width: 2.0,
                       ),
                       image: DecorationImage(
-                        image: AssetImage(widget.imageUrls[index]),
+                        image: NetworkImage(widget.imageUrls[index]), // Use NetworkImage for API images
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -358,7 +386,7 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
 }
 
 class FullScreenImageView extends StatelessWidget {
-  final List<String> imageUrls;
+  final List<String> imageUrls; // Pass imageUrls as a parameter
   final int initialIndex;
 
   FullScreenImageView({required this.imageUrls, required this.initialIndex});
@@ -372,7 +400,7 @@ class FullScreenImageView extends StatelessWidget {
             itemCount: imageUrls.length,
             builder: (context, index) {
               return PhotoViewGalleryPageOptions(
-                imageProvider: AssetImage(imageUrls[index]),
+                imageProvider: NetworkImage(imageUrls[index]), // Use NetworkImage for API images
                 minScale: PhotoViewComputedScale.contained,
                 maxScale: PhotoViewComputedScale.covered * 2,
               );
