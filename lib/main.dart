@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'add_catatan.dart';
 import 'header.dart';
 import 'detail_catatan.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -23,8 +25,35 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class CustomBody extends StatelessWidget {
+class CustomBody extends StatefulWidget {
   const CustomBody({Key? key}) : super(key: key);
+
+  @override
+  _CustomBodyState createState() => _CustomBodyState();
+}
+
+class _CustomBodyState extends State<CustomBody> {
+  late List<Map<String, dynamic>> catatanList;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCatatanData();
+  }
+
+  Future<void> fetchCatatanData() async {
+    final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/');
+
+    final response = await http.get(apiUrl);
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      setState(() {
+        catatanList = List<Map<String, dynamic>>.from(data['data']);
+      });
+    } else {
+      throw Exception('Failed to load Data');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,19 +147,19 @@ class CustomBody extends StatelessWidget {
                   mainAxisSpacing: 16.0,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: cardDataList.length,
+                itemCount: catatanList.length,
                 itemBuilder: (context, index) {
                   return CardTemplate(
-                    cardData: cardDataList[index],
+                    catatanData: catatanList[index],
                   );
                 },
               )
                   : ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: cardDataList.length,
+                itemCount: catatanList.length,
                 itemBuilder: (context, index) {
                   return CardTemplate(
-                    cardData: cardDataList[index],
+                    catatanData: catatanList[index],
                   );
                 },
               );
@@ -188,26 +217,12 @@ class CustomFloatingActionButton extends StatelessWidget {
   }
 }
 
-class CardData {
-  final String image;
-  final String title;
-  final String sender;
-  final String pages;
-
-  CardData({
-    required this.image,
-    required this.title,
-    required this.sender,
-    required this.pages,
-  });
-}
-
 class CardTemplate extends StatelessWidget {
-  final CardData cardData;
+  final Map<String, dynamic> catatanData;
 
   const CardTemplate({
     Key? key,
-    required this.cardData,
+    required this.catatanData,
   }) : super(key: key);
 
   @override
@@ -236,7 +251,7 @@ class CardTemplate extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       image: DecorationImage(
-                        image: AssetImage(cardData.image),
+                        image: NetworkImage(catatanData['thumbnail']['image_url']),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -248,7 +263,7 @@ class CardTemplate extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          cardData.title,
+                          catatanData['title'],
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -259,7 +274,7 @@ class CardTemplate extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          cardData.sender,
+                          catatanData['owner']['name'],
                           style: const TextStyle(
                             fontFamily: 'Nunito',
                             fontSize: 16,
@@ -276,7 +291,7 @@ class CardTemplate extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '${cardData.pages} Halaman',
+                              '${catatanData['image_count']} Halaman',
                               style: const TextStyle(
                                 fontFamily: 'Nunito',
                                 fontSize: 12,
@@ -297,39 +312,3 @@ class CardTemplate extends StatelessWidget {
     );
   }
 }
-
-
-final List<CardData> cardDataList = [
-  CardData(
-    image: 'assets/images/epep.jpg',
-    title: 'Tutorial Jamsut EPEP Terbaru auto headshot 2024',
-    sender: 'Kairi_kumar40',
-    pages: '150',
-  ),
-  CardData(
-    image: 'assets/images/kerajinan.jpg',
-    title: 'Kerajinan Bahan Dari Alam',
-    sender: 'budi',
-    pages: '7',
-  ),
-  CardData(
-    image: 'assets/images/pohon.jpg',
-    title: 'Tata Cara Menanam Pohon',
-    sender: 'cintaalam',
-    pages: '12',
-  ),
-  CardData(
-    image: 'assets/images/saklar.png',
-    title: 'Tutorial menyalakan lampu paling efektif, 5 Menit belajar langsung bisa',
-    sender: 'asikin_NasiJagung',
-    pages: '4',
-  ),
-  CardData(
-    image: 'assets/images/ow.png',
-    title: 'MATEMATIKA Kelas 14 buat yang ngulang semester',
-    sender: 'pintarbersama',
-    pages: '5',
-  ),
-  // Tambahkan data lebih banyak jika diperlukan
-];
-
