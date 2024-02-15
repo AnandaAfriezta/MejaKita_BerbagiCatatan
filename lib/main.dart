@@ -34,6 +34,10 @@ class CustomBody extends StatefulWidget {
 
 class _CustomBodyState extends State<CustomBody> {
   late List<Map<String, dynamic>> catatanList;
+  bool isLoading = true;
+  int currentPage = 1;
+  int itemsPerPage = 5;
+  bool allDataLoaded = false;
 
   @override
   void initState() {
@@ -42,26 +46,54 @@ class _CustomBodyState extends State<CustomBody> {
   }
 
   Future<void> fetchCatatanData() async {
-    final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/');
+    final Uri apiUrl =
+        Uri.parse('https://service-catatan.mejakita.com/catatan/');
 
     final response = await http.get(apiUrl);
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       setState(() {
         catatanList = List<Map<String, dynamic>>.from(data['data']);
+        isLoading = false;
+        allDataLoaded = catatanList.length <= itemsPerPage;
       });
     } else {
       throw Exception('Failed to load Data');
     }
   }
 
+  bool _onScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollEndNotification &&
+        notification.metrics.pixels == notification.metrics.maxScrollExtent &&
+        !allDataLoaded) {
+      setState(() {
+        currentPage++;
+        if (currentPage * itemsPerPage >= catatanList.length) {
+          allDataLoaded = true;
+        }
+      });
+      return true;
+    }
+    return false;
+  }
+
+  Widget _buildLoadingIndicator() {
+    return const SizedBox(
+      height: 80,
+      child: Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF31B057),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const CustomHeader(isHomePage: true,),
+        const CustomHeader(isHomePage: true),
         const SizedBox(height: 10),
-        // SearchBar ditambahkan di sini dengan margin
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Row(
@@ -69,7 +101,7 @@ class _CustomBodyState extends State<CustomBody> {
               Expanded(
                 child: Container(
                   constraints: const BoxConstraints(
-                    minHeight: 40, // Set the desired height
+                    minHeight: 40,
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
@@ -137,34 +169,70 @@ class _CustomBodyState extends State<CustomBody> {
         ),
         const SizedBox(height: 10),
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return constraints.maxWidth > 600
-                  ? GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
+          child: isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF31B057),
+                  ),
+                )
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 600;
+                    int itemCount = isMobile
+                        ? currentPage * itemsPerPage
+                        : catatanList.length;
+
+                    return NotificationListener<ScrollNotification>(
+                      onNotification: _onScrollNotification,
+                      child: isMobile
+                          ? ListView.builder(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              itemCount: itemCount + (allDataLoaded ? 0 : 1),
+                              itemBuilder: (context, index) {
+                                if (index == itemCount && !allDataLoaded) {
+                                  return _buildLoadingIndicator();
+                                }
+                                return index < catatanList.length
+                                    ? CardTemplate(
+                                        catatanData: catatanList[index],
+                                      )
+                                    : null;
+                              },
+                            )
+                          : GridView.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 16.0,
+                                mainAxisSpacing: 16.0,
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              itemCount: itemCount,
+                              itemBuilder: (context, index) {
+                                if (index == itemCount - 1 && !allDataLoaded) {
+                                  return const SizedBox(
+                                    height: 80,
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+                                return index < catatanList.length
+                                    ? AspectRatio(
+                                        aspectRatio: 16 / 9,
+                                        // Sesuaikan dengan rasio yang Anda inginkan
+                                        child: CardTemplate(
+                                          catatanData: catatanList[index],
+                                        ),
+                                      )
+                                    : null; // Return null for the items beyond the list length
+                              },
+                            ),
+                    );
+                  },
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: catatanList.length,
-                itemBuilder: (context, index) {
-                  return CardTemplate(
-                    catatanData: catatanList[index],
-                  );
-                },
-              )
-                  : ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: catatanList.length,
-                itemBuilder: (context, index) {
-                  return CardTemplate(
-                    catatanData: catatanList[index],
-                  );
-                },
-              );
-            },
-          ),
         ),
       ],
     );
@@ -227,6 +295,97 @@ class CardTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width >= 600;
+
+    return isTablet ? _buildTabletCard(context) : _buildMobileCard(context);
+  }
+
+  Widget _buildTabletCard(BuildContext context) {
+    double cardHeight = 175.0; // Initial card height, adjust as needed
+
+    return SizedBox(
+      height: cardHeight, // Set the height of the entire card
+      child: Card(
+        color: Colors.white,
+        elevation: 0,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailCatatanPage(),
+              ),
+            );
+          },
+          child: Row(
+            children: [
+              Container(
+                width: 100, // Width of the image container
+                height: cardHeight, // Height of the image container
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: NetworkImage(catatanData['thumbnail']['image_url']),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      catatanData['title'],
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      catatanData['owner']['name'],
+                      style: const TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 16,
+                        color: Color(0xFF2D6A4F),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Image.asset(
+                          'assets/images/article.png',
+                          width: 30,
+                          height: 30,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${catatanData['image_count']} Halaman',
+                          style: const TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 12,
+                            color: Color(0xFFA1A1A1),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildMobileCard(BuildContext context) {
     return SizedBox(
       height: 175,
       child: Card(
@@ -312,3 +471,4 @@ class CardTemplate extends StatelessWidget {
     );
   }
 }
+
