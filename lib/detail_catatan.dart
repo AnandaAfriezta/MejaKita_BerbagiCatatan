@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'header.dart';
 import 'package:photo_view/photo_view.dart';
@@ -6,19 +8,26 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class DetailCatatanPage extends StatelessWidget {
+  final String slug;
+
+  DetailCatatanPage({required this.slug});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomHeader(isHomePage: false),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: YourContentWidget(),
+        child: YourContentWidget(slug: slug),
       ),
     );
   }
 }
 
 class YourContentWidget extends StatefulWidget {
+  final String slug;
+
+  YourContentWidget({required this.slug});
   @override
   _YourContentWidgetState createState() => _YourContentWidgetState();
 }
@@ -43,7 +52,7 @@ class _YourContentWidgetState extends State<YourContentWidget> {
 
   // Function to fetch data from the API
   Future<CatatanData> fetchDataUrls() async {
-    final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/fastabiqul-khairat');
+    final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/${widget.slug}');
 
     final response = await http.get(apiUrl);
     if (response.statusCode == 200) {
@@ -74,14 +83,20 @@ class _YourContentWidgetState extends State<YourContentWidget> {
         } else {
           // Data sudah diambil, tampilkan konten utama
           final CatatanData catatanData = snapshot.data as CatatanData;
+          print('Number of images: ${catatanData.images.length}');
 
           return LayoutBuilder(
             builder: (context, constraints) {
+              int itemCount = max(1, catatanData.images.length);
               double screenWidth = MediaQuery.of(context).size.width;
-              double aspectRatio = screenWidth > 640 ? 1.41 / 1 : 1 / 1.41;
+              double aspectRatio = screenWidth > 640 ?  1.41 / 1 : 1 / 1.41;
 
-              int visibleImages = screenWidth > 640 ? 2 : 1;
+              if (screenWidth > 640 && catatanData.images.length > 1) {
+                itemCount -= 1;
+              }
 
+              int visibleImages = min(catatanData.images.length, screenWidth > 640 ? 2 : 1);
+              print('ScreenWidth: $screenWidth, VisibleImages: $visibleImages');
               return SingleChildScrollView(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
@@ -96,7 +111,7 @@ class _YourContentWidgetState extends State<YourContentWidget> {
                           AspectRatio(
                             aspectRatio: aspectRatio,
                             child: PageView.builder(
-                              itemCount: screenWidth > 640 ? catatanData.images.length - 1 : catatanData.images.length,
+                              itemCount: itemCount,
                               controller: _pageController,
                               onPageChanged: (index) {
                                 setState(() {
@@ -114,10 +129,10 @@ class _YourContentWidgetState extends State<YourContentWidget> {
                                           },
                                           child: Hero(
                                             tag: 'image-${index + i}',
-                                            child: buildImageWithFallback(
-                                              catatanData.images[index + i].imageUrl,
-                                              catatanData.images[index + i].imagePreview,
-                                            ),
+                                              child: buildImageWithFallback(
+                                                catatanData.images[index + i].imageUrl,
+                                                catatanData.images[index + i].imagePreview,
+                                              ),
                                           ),
                                         ),
                                       ),
@@ -183,13 +198,31 @@ class _YourContentWidgetState extends State<YourContentWidget> {
   }
 
   Widget buildImageWithFallback(String imageUrl, String fallbackUrl) {
+    print('Building image: $imageUrl');
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Image.network(
       imageUrl,
-      fit: BoxFit.cover,
+      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        } else {
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                  : null,
+            ),
+          );
+        }
+      },
       errorBuilder: (context, error, stackTrace) {
+        print('Error loading image, falling back to: $fallbackUrl');
         return Image.network(
           fallbackUrl,
           fit: BoxFit.cover,
+          width: screenWidth > 640 ? screenWidth / 2 : null,
+          height: screenWidth > 640 ? null : screenWidth / 1.41,
         );
       },
     );
@@ -468,7 +501,7 @@ class FullScreenImageView extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             body: Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.green)),
             ),
           );
         } else if (snapshot.hasError) {
