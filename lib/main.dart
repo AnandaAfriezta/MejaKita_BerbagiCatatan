@@ -177,7 +177,7 @@ class _CustomBodyState extends State<CustomBody> {
                 )
               : LayoutBuilder(
                   builder: (context, constraints) {
-                    final isMobile = constraints.maxWidth < 600;
+                    final isMobile = constraints.maxWidth < 640;
                     int itemCount = isMobile
                         ? currentPage * itemsPerPage
                         : catatanList.length;
@@ -206,6 +206,8 @@ class _CustomBodyState extends State<CustomBody> {
                                 crossAxisCount: 2,
                                 crossAxisSpacing: 16.0,
                                 mainAxisSpacing: 16.0,
+                                childAspectRatio:
+                                    2.2,
                               ),
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 16),
@@ -220,12 +222,8 @@ class _CustomBodyState extends State<CustomBody> {
                                   );
                                 }
                                 return index < catatanList.length
-                                    ? AspectRatio(
-                                        aspectRatio: 16 / 9,
-                                        // Sesuaikan dengan rasio yang Anda inginkan
-                                        child: CardTemplate(
-                                          catatanData: catatanList[index],
-                                        ),
+                                    ? CardTemplate(
+                                        catatanData: catatanList[index],
                                       )
                                     : null; // Return null for the items beyond the list length
                               },
@@ -287,22 +285,16 @@ class CustomFloatingActionButton extends StatelessWidget {
 
 class CardTemplate extends StatelessWidget {
   final Map<String, dynamic> catatanData;
+  final double cardHeight;
 
   const CardTemplate({
     Key? key,
     required this.catatanData,
+    this.cardHeight = 175.0, // Default card height, adjust as needed
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.width >= 600;
-
-    return isTablet ? _buildTabletCard(context) : _buildMobileCard(context);
-  }
-
-  Widget _buildTabletCard(BuildContext context) {
-    double cardHeight = 175.0; // Initial card height, adjust as needed
-
     return SizedBox(
       height: cardHeight, // Set the height of the entire card
       child: Card(
@@ -313,15 +305,15 @@ class CardTemplate extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => DetailCatatanPage(),
+                builder: (context) => DetailCatatanPage(slug: catatanData['slug']),
               ),
             );
           },
           child: Row(
             children: [
               Container(
-                width: 100, // Width of the image container
-                height: cardHeight, // Height of the image container
+                width: 100,
+                height: cardHeight,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   image: DecorationImage(
@@ -378,93 +370,6 @@ class CardTemplate extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-
-  Widget _buildMobileCard(BuildContext context) {
-    return SizedBox(
-      height: 175,
-      child: Card(
-        color: Colors.white,
-        elevation: 0,
-        child: InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DetailCatatanPage(slug: catatanData['slug']),
-              ),
-            );
-          },
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Row(
-                children: [
-                  Container(
-                    width: 100,
-                    height: 175,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      image: DecorationImage(
-                        image: NetworkImage(catatanData['thumbnail']['image_url']),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          catatanData['title'],
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          catatanData['owner']['name'],
-                          style: const TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 16,
-                            color: Color(0xFF2D6A4F),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Image.asset(
-                              'assets/images/article.png',
-                              width: 30,
-                              height: 30,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${catatanData['image_count']} Halaman',
-                              style: const TextStyle(
-                                fontFamily: 'Nunito',
-                                fontSize: 12,
-                                color: Color(0xFFA1A1A1),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
           ),
         ),
       ),
