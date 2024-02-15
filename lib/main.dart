@@ -237,7 +237,7 @@ class CardTemplate extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => DetailCatatanPage(),
+                builder: (context) => DetailCatatanPage(slug: catatanData['slug']),
               ),
             );
           },
