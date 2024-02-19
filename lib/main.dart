@@ -206,8 +206,7 @@ class _CustomBodyState extends State<CustomBody> {
                                 crossAxisCount: 2,
                                 crossAxisSpacing: 16.0,
                                 mainAxisSpacing: 16.0,
-                                childAspectRatio:
-                                    2.2,
+                                childAspectRatio: 2.2,
                               ),
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 16),
@@ -225,7 +224,7 @@ class _CustomBodyState extends State<CustomBody> {
                                     ? CardTemplate(
                                         catatanData: catatanList[index],
                                       )
-                                    : null; // Return null for the items beyond the list length
+                                    : null;
                               },
                             ),
                     );
@@ -305,7 +304,8 @@ class CardTemplate extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => DetailCatatanPage(slug: catatanData['slug']),
+                builder: (context) =>
+                    DetailCatatanPage(slug: catatanData['slug']),
               ),
             );
           },
@@ -376,4 +376,3 @@ class CardTemplate extends StatelessWidget {
     );
   }
 }
-
