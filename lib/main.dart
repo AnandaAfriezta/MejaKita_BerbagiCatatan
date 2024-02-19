@@ -216,7 +216,7 @@ class _CustomBodyState extends State<CustomBody> {
                                   return const SizedBox(
                                     height: 80,
                                     child: Center(
-                                      child: CircularProgressIndicator(),
+                                      child: CircularProgressIndicator(color: Color(0xFF31B057)),
                                     ),
                                   );
                                 }

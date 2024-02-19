@@ -18,21 +18,21 @@ class DetailCatatanPage extends StatelessWidget {
       appBar: const CustomHeader(isHomePage: false),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: YourContentWidget(slug: slug),
+        child: DetailCatatanWidget(slug: slug),
       ),
     );
   }
 }
 
-class YourContentWidget extends StatefulWidget {
+class DetailCatatanWidget extends StatefulWidget {
   final String slug;
 
-  YourContentWidget({required this.slug});
+  DetailCatatanWidget({required this.slug});
   @override
-  _YourContentWidgetState createState() => _YourContentWidgetState();
+  _DetailCatatanWidgetState createState() => _DetailCatatanWidgetState();
 }
 
-class _YourContentWidgetState extends State<YourContentWidget> {
+class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
   late Future<CatatanData> catatanDataFuture;
   int currentPage = 0;
   late PageController _pageController;
