@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'header.dart';
+import 'widget/header.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'dart:math';
 
