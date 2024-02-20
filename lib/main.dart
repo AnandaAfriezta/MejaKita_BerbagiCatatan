@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_catatan.dart';
-import 'header.dart';
+import 'widget/header.dart';
 import 'detail_catatan.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -33,11 +33,12 @@ class CustomBody extends StatefulWidget {
 }
 
 class _CustomBodyState extends State<CustomBody> {
-  late List<Map<String, dynamic>> catatanList;
+  late List<Map<String, dynamic>> catatanList = [];
   bool isLoading = true;
   int currentPage = 1;
   int itemsPerPage = 5;
   bool allDataLoaded = false;
+  int availablePage = 1;
 
   @override
   void initState() {
@@ -46,16 +47,19 @@ class _CustomBodyState extends State<CustomBody> {
   }
 
   Future<void> fetchCatatanData() async {
-    final Uri apiUrl =
-        Uri.parse('https://service-catatan.mejakita.com/catatan/');
-
+    final Uri apiUrl = Uri.parse(
+        'https://service-catatan.mejakita.com/catatan?itemPerPage=$itemsPerPage&page=$currentPage'
+    );
+    print("API URL: $apiUrl");
     final response = await http.get(apiUrl);
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       setState(() {
-        catatanList = List<Map<String, dynamic>>.from(data['data']);
+        // Append new data to the existing list
+        catatanList.addAll(List<Map<String, dynamic>>.from(data['data']));
+        availablePage = data['pagination']['availablePage'];
         isLoading = false;
-        allDataLoaded = catatanList.length <= itemsPerPage;
+        allDataLoaded = currentPage >= availablePage;
       });
     } else {
       throw Exception('Failed to load Data');
@@ -68,10 +72,8 @@ class _CustomBodyState extends State<CustomBody> {
         !allDataLoaded) {
       setState(() {
         currentPage++;
-        if (currentPage * itemsPerPage >= catatanList.length) {
-          allDataLoaded = true;
-        }
       });
+      fetchCatatanData();
       return true;
     }
     return false;
@@ -171,66 +173,67 @@ class _CustomBodyState extends State<CustomBody> {
         Expanded(
           child: isLoading
               ? const Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF31B057),
-                  ),
-                )
+            child: CircularProgressIndicator(
+              color: Color(0xFF31B057),
+            ),
+          )
               : LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isMobile = constraints.maxWidth < 640;
-                    int itemCount = isMobile
-                        ? currentPage * itemsPerPage
-                        : catatanList.length;
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 640;
+              int itemCount = isMobile
+                  ? currentPage * itemsPerPage
+                  : catatanList.length;
 
-                    return NotificationListener<ScrollNotification>(
-                      onNotification: _onScrollNotification,
-                      child: isMobile
-                          ? ListView.builder(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              itemCount: itemCount + (allDataLoaded ? 0 : 1),
-                              itemBuilder: (context, index) {
-                                if (index == itemCount && !allDataLoaded) {
-                                  return _buildLoadingIndicator();
-                                }
-                                return index < catatanList.length
-                                    ? CardTemplate(
-                                        catatanData: catatanList[index],
-                                      )
-                                    : null;
-                              },
-                            )
-                          : GridView.builder(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 16.0,
-                                mainAxisSpacing: 16.0,
-                                childAspectRatio:
-                                    2.2,
-                              ),
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              itemCount: itemCount,
-                              itemBuilder: (context, index) {
-                                if (index == itemCount - 1 && !allDataLoaded) {
-                                  return const SizedBox(
-                                    height: 80,
-                                    child: Center(
-                                      child: CircularProgressIndicator(color: Color(0xFF31B057)),
-                                    ),
-                                  );
-                                }
-                                return index < catatanList.length
-                                    ? CardTemplate(
-                                        catatanData: catatanList[index],
-                                      )
-                                    : null; // Return null for the items beyond the list length
-                              },
-                            ),
-                    );
+              return NotificationListener<ScrollNotification>(
+                onNotification: _onScrollNotification,
+                child: isMobile
+                    ? ListView.builder(
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: itemCount + (allDataLoaded ? 0 : 1),
+                  itemBuilder: (context, index) {
+                    if (index == catatanList.length &&
+                        !allDataLoaded) {
+                      return _buildLoadingIndicator();
+                    }
+                    return index < catatanList.length
+                        ? CardTemplate(
+                      catatanData: catatanList[index],
+                    )
+                        : null;
+                  },
+                )
+                    : GridView.builder(
+                  gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16.0,
+                    mainAxisSpacing: 16.0,
+                    childAspectRatio: 2.2,
+                  ),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: itemCount,
+                  itemBuilder: (context, index) {
+                    if (index == itemCount - 1 && !allDataLoaded) {
+                      return const SizedBox(
+                        height: 80,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                              color: Color(0xFF31B057)),
+                        ),
+                      );
+                    }
+                    return index < catatanList.length
+                        ? CardTemplate(
+                      catatanData: catatanList[index],
+                    )
+                        : null; // Return null for the items beyond the list length
                   },
                 ),
+              );
+            },
+          ),
         ),
       ],
     );
@@ -293,6 +296,28 @@ class CardTemplate extends StatelessWidget {
     this.cardHeight = 175.0, // Default card height, adjust as needed
   }) : super(key: key);
 
+  String calculateTimeDifference(String createdAt) {
+    DateTime createdDateTime = DateTime.parse(createdAt);
+    DateTime now = DateTime.now();
+    Duration difference = now.difference(createdDateTime);
+
+    if (difference.inDays > 365) {
+      int years = (difference.inDays / 365).floor();
+      return '$years ${years == 1 ? 'tahun' : 'tahun'} yang lalu';
+    } else if (difference.inDays >= 30) {
+      int months = (difference.inDays / 30).floor();
+      return '$months ${months == 1 ? 'bulan' : 'bulan'} yang lalu';
+    } else if (difference.inDays >= 1) {
+      return '${difference.inDays} ${difference.inDays == 1 ? 'hari' : 'hari'} yang lalu';
+    } else if (difference.inHours >= 1) {
+      return '${difference.inHours} ${difference.inHours == 1 ? 'jam' : 'jam'} yang lalu';
+    } else if (difference.inMinutes >= 1) {
+      return '${difference.inMinutes} ${difference.inMinutes == 1 ? 'menit' : 'menit'} yang lalu';
+    } else {
+      return 'Baru saja';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -316,10 +341,12 @@ class CardTemplate extends StatelessWidget {
                 height: cardHeight,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  image: DecorationImage(
+                  image: catatanData['thumbnail'] != null && catatanData['thumbnail']['image_url'] != null
+                      ? DecorationImage(
                     image: NetworkImage(catatanData['thumbnail']['image_url']),
                     fit: BoxFit.cover,
-                  ),
+                  )
+                      : null, // Check if the 'image_url' field is present
                 ),
               ),
               const SizedBox(width: 20),
@@ -350,19 +377,39 @@ class CardTemplate extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Image.asset(
-                          'assets/images/article.png',
-                          width: 30,
-                          height: 30,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${catatanData['image_count']} Halaman',
-                          style: const TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 12,
-                            color: Color(0xFFA1A1A1),
+                        if (catatanData['image_count'] != null)
+                          Row(
+                            children: [
+                              Image.asset(
+                                'assets/images/article.png',
+                                width: 30,
+                                height: 30,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${catatanData['image_count']} Halaman',
+                                style: const TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: 12,
+                                  color: Color(0xFFA1A1A1),
+                                ),
+                              ),
+                            ],
                           ),
+                        const SizedBox(width: 8),
+                        Row(
+                          children: [
+                            Icon(Icons.access_time, size: 16, color: Color(0xFFA1A1A1)),
+                            const SizedBox(width: 4),
+                            Text(
+                              calculateTimeDifference(catatanData['created_at']),
+                              style: const TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 12,
+                                color: Color(0xFFA1A1A1),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -376,4 +423,3 @@ class CardTemplate extends StatelessWidget {
     );
   }
 }
-
