@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'header.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'dart:math';
 
 class AddCatatanPage extends StatefulWidget {
   const AddCatatanPage({Key? key}) : super(key: key);
@@ -143,7 +144,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                               return Stack(
                                 children: [
                                   Center(
-                                    child: Image.file(_selectedImages[_currentPage]),
+                                    child: ImageContainer(imageFile: _selectedImages[_currentPage]),
                                   ),
                                   // Button Back ("<")
                                   Align(
@@ -372,6 +373,42 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// Widget untuk menampilkan gambar dalam wadah dengan frame
+class ImageContainer extends StatelessWidget {
+  final File imageFile;
+  final double width;
+  final double height;
+
+  const ImageContainer({
+    Key? key,
+    required this.imageFile,
+    this.width = 160,
+    this.height = 227,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey[200], // Warna latar belakang frame
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Transform.rotate(
+          angle: -90 * (pi / 180), // Rotate gambar jika perlu
+          child: Image.file(
+            imageFile,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
