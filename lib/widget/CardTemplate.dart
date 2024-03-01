@@ -141,9 +141,9 @@ class CardTemplate extends StatelessWidget {
                                     width: 30,
                                     height: 30,
                                   ),
-                                  const SizedBox(width: 4),
                                   Text(
                                     '${catatanData['image_count']} Halaman',
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontFamily: 'Nunito',
                                       fontSize: 12,
@@ -153,20 +153,22 @@ class CardTemplate extends StatelessWidget {
                                 ],
                               ),
                             const SizedBox(width: 8),
-                            Row(
-                              children: [
-                                Icon(Icons.access_time, size: 16, color: Color(0xFFA1A1A1)),
-                                const SizedBox(width: 4),
-                                Text(
-                                  calculateTimeDifference(catatanData['created_at']),
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontFamily: 'Nunito',
-                                    fontSize: 12,
-                                    color: Color(0xFFA1A1A1),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(Icons.access_time, size: 16, color: Color(0xFFA1A1A1)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    calculateTimeDifference(catatanData['created_at']),
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'Nunito',
+                                      fontSize: 12,
+                                      color: Color(0xFFA1A1A1),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),

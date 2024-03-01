@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
-import '../add_catatan.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../add_catatan.dart';
 
 class CustomFloatingActionButton extends StatelessWidget {
   const CustomFloatingActionButton({Key? key}) : super(key: key);
@@ -26,12 +28,20 @@ class CustomFloatingActionButton extends StatelessWidget {
         shape: const CircleBorder(),
         child: InkWell(
           borderRadius: BorderRadius.circular(28.0),
-          // Menyesuaikan dengan bentuk FAB
-          onTap: () {
+          onTap: () async {
+            // Retrieve login data from SharedPreferences
+            final SharedPreferences prefs = await SharedPreferences.getInstance();
+            Map<String, dynamic>? loginData;
+            String? loginDataString = prefs.getString('userData');
+            if (loginDataString != null) {
+              loginData = json.decode(loginDataString);
+            }
+            print(loginDataString);
+
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const  AddCatatanPage(),
+                builder: (context) => AddCatatanPage(loginData: loginData),
               ),
             );
           },

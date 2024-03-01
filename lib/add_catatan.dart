@@ -4,13 +4,15 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io'; // Import header.dart di sini
 
 class AddCatatanPage extends StatefulWidget {
-  const AddCatatanPage({Key? key}) : super(key: key);
+  const AddCatatanPage({Key? key, required Map<String, dynamic>? loginData}) : super(key: key);
 
   @override
   _AddCatatanPageState createState() => _AddCatatanPageState();
 }
 
+
 class _AddCatatanPageState extends State<AddCatatanPage> {
+
   final List<File> _selectedImages = [];
   final picker = ImagePicker();
   final TextEditingController _tagController = TextEditingController();
