@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../add_catatan.dart';
+import '../login_catatan.dart'; // Gantilah dengan import yang sesuai untuk halaman login
 
 class CustomFloatingActionButton extends StatelessWidget {
   const CustomFloatingActionButton({Key? key}) : super(key: key);
@@ -33,17 +34,27 @@ class CustomFloatingActionButton extends StatelessWidget {
             final SharedPreferences prefs = await SharedPreferences.getInstance();
             Map<String, dynamic>? loginData;
             String? loginDataString = prefs.getString('userData');
+
+            // Check if login data is available
             if (loginDataString != null) {
               loginData = json.decode(loginDataString);
-            }
-            print(loginDataString);
+              print(loginDataString);
 
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddCatatanPage(loginData: loginData),
-              ),
-            );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddCatatanPage(loginData: loginData),
+                ),
+              );
+            } else {
+              // Redirect to login page if login data is not available
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LoginPage(),
+                ),
+              );
+            }
           },
           child: const Padding(
             padding: EdgeInsets.all(12.0),
