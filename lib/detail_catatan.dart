@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'widget/header.dart';
 import 'dart:convert';
@@ -18,7 +17,7 @@ class DetailCatatanPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomHeader(isHomePage: false),
+      appBar: const CustomHeader(isHomePage: false, isLoggedIn: false,),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: DetailCatatanWidget(slug: slug),

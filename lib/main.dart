@@ -93,8 +93,9 @@ class _CustomBodyState extends State<CustomBody> {
   @override
   Widget build(BuildContext context) {
     return Column(
+
       children: [
-        const CustomHeader(isHomePage: true),
+        const CustomHeader(isHomePage: true, isLoggedIn: false,),
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -399,7 +400,7 @@ class CardTemplate extends StatelessWidget {
                         const SizedBox(width: 8),
                         Row(
                           children: [
-                            Icon(Icons.access_time, size: 16, color: Color(0xFFA1A1A1)),
+                            const Icon(Icons.access_time, size: 16, color: Color(0xFFA1A1A1)),
                             const SizedBox(width: 4),
                             Text(
                               calculateTimeDifference(catatanData['created_at']),
