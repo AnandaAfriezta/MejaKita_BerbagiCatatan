@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CustomPageIndicator extends StatefulWidget {
   final int itemCount;
@@ -18,8 +19,6 @@ class CustomPageIndicator extends StatefulWidget {
 }
 
 class _CustomPageIndicatorState extends State<CustomPageIndicator> {
-  double indicatorPosition = 0.0;
-
   @override
   void initState() {
     super.initState();
@@ -33,18 +32,13 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
   }
 
   void _updateIndicatorPosition() {
-    setState(() {
-      indicatorPosition = widget.pageController.page!.clamp(0.0, widget.itemCount - 1.0);
-    });
+    // No need to update the state here
   }
 
   @override
   Widget build(BuildContext context) {
     double indicatorWidth = 50.0;
     double padding = 5.0;
-
-    // Adjust itemCount to match the number of images displayed
-    int adjustedItemCount = widget.itemCount;
 
     return Container(
       height: 70.0,
@@ -53,25 +47,21 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
           width: MediaQuery.of(context).size.width,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: adjustedItemCount,
+            itemCount: widget.itemCount,
             itemBuilder: (context, index) {
-              bool isLastImage = index == adjustedItemCount;
+              bool isCurrentPage = index == widget.currentPage;
 
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: padding),
                 child: GestureDetector(
                   onTap: () {
                     // If clicking the last image indicator, move to the last page without animation
-                    if (isLastImage) {
-                      widget.pageController.jumpToPage(adjustedItemCount - 1);
-                    } else {
                       // If clicking other indicators, animate as usual
                       widget.pageController.animateToPage(
                         index,
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
                       );
-                    }
                   },
                   child: Container(
                     width: indicatorWidth,
@@ -80,13 +70,18 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
                       shape: BoxShape.rectangle,
                       borderRadius: BorderRadius.circular(5.0),
                       border: Border.all(
-                        color: (indicatorPosition - (isLastImage ? adjustedItemCount - 1.0 : index)).abs() < 0.5
-                            ? Colors.green
-                            : Colors.white,
+                        color: isCurrentPage ? Colors.green : Colors.white,
                         width: 2.0,
                       ),
-                      image: DecorationImage(
-                        image: NetworkImage(widget.imageUrls[index]), // Use NetworkImage for API images
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5.0),
+                      child: CachedNetworkImage(
+                        imageUrl: widget.imageUrls[index],
+                        placeholder: (context, url) => _buildPlaceholder(),
+                        errorWidget: (context, url, error) => _buildErrorWidget(),
+                        width: indicatorWidth - 4.0, // Adjust the width to avoid overlap
+                        height: 66.0, // Adjust the height to fit within the container
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -95,6 +90,26 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
               );
             },
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    // You can customize this placeholder widget
+    return Container(
+      color: Colors.grey[300],
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    // You can customize this error widget
+    return Container(
+      color: Colors.red,
+      child: Center(
+        child: Icon(
+          Icons.error,
+          color: Colors.white,
         ),
       ),
     );
