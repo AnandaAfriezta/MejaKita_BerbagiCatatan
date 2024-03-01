@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../login_catatan.dart';
+
 class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool isHomePage;
+  final bool isLoggedIn; // Tambahkan variabel untuk menentukan status login
 
-  const CustomHeader({Key? key, required this.isHomePage}) : super(key: key);
+  const CustomHeader({Key? key, required this.isHomePage, required this.isLoggedIn}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +52,28 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ],
               ),
-              // Add profile widget here
-              const CircleAvatar(
-                radius: 20,
-                backgroundImage: AssetImage('assets/images/profile.png'),
+              // Tambahkan kondisi untuk menampilkan dropdown hanya jika pengguna sudah login
+              isLoggedIn ? DropdownButton<String>(
+                items: <String>['Profile', 'Logout'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  // Tambahkan logika untuk masing-masing item dropdown di sini
+                },
+              ) : InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+                },
+                child: const CircleAvatar(
+                  radius: 20,
+                  backgroundImage: AssetImage('assets/images/profile.png'),
+                ),
               ),
             ],
           ),

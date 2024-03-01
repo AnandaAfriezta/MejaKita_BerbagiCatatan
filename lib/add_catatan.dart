@@ -1,8 +1,7 @@
+import 'package:berbagi_catatan/widget/header.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'widget/header.dart';
-import 'package:dots_indicator/dots_indicator.dart';
+import 'dart:io'; // Import header.dart di sini
 
 class AddCatatanPage extends StatefulWidget {
   const AddCatatanPage({Key? key}) : super(key: key);
@@ -13,11 +12,11 @@ class AddCatatanPage extends StatefulWidget {
 
 class _AddCatatanPageState extends State<AddCatatanPage> {
   final List<File> _selectedImages = [];
-  int _currentPage = 0;
-  PageController _pageController = PageController();
+  final picker = ImagePicker();
+  final TextEditingController _tagController = TextEditingController();
+  final List<String> _tags = [];
 
   Future<void> _selectImage() async {
-    final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
@@ -27,16 +26,50 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
     }
   }
 
+  void _deleteImage(int index) {
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
+  }
+
+  void _moveImageLeft(int index) {
+    if (index > 1) {
+      setState(() {
+        File temp = _selectedImages[index - 1];
+        _selectedImages[index - 1] = _selectedImages[index - 2];
+        _selectedImages[index - 2] = temp;
+      });
+    }
+  }
+
+  void _moveImageRight(int index) {
+    if (index < _selectedImages.length) {
+      setState(() {
+        File temp = _selectedImages[index - 1];
+        _selectedImages[index - 1] = _selectedImages[index];
+        _selectedImages[index] = temp;
+      });
+    }
+  }
+
+  void _addTag(String tag) {
+    setState(() {
+      _tags.add(tag);
+      _tagController.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomHeader(isHomePage: false),
+      appBar: const CustomHeader(isHomePage: false, isLoggedIn: false,),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Judul Catatan
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -84,6 +117,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                 ],
               ),
               const SizedBox(height: 16),
+              // Gambar Catatan
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -97,128 +131,133 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: _selectImage,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: const Color(0xFFF3F4F6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.upload_file,
-                          color: Color(0xFF9CA3AF),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'Pilih File',
-                          style: TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF9CA3AF),
-                          ),
-                        ),
-                      ],
+                  SizedBox(
+                    height: 227,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _selectedImages.length + 1,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == 0) {
+                          return GestureDetector(
+                            onTap: _selectImage,
+                            child: Container(
+                              width: 150,
+                              height: 227,
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: const Color(0xFFF3F4F6),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.add,
+                                  size: 40,
+                                  color: Color(0xFF9CA3AF),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        return Stack(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                              width: 150,
+                              height: 227,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: const Color(0xFFF3F4F6),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  _selectedImages[index - 1],
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  if (index > 1) // Tampilkan button "<" jika index gambar bukan yang pertama
+                                    Center(
+                                      child: Container(
+                                        margin: const EdgeInsets.only(bottom: 8, left: 16),
+                                        height: 30,
+                                        width: 30,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: FittedBox(
+                                          fit: BoxFit.contain,
+                                          child: IconButton(
+                                            icon: const Icon(Icons.arrow_back),
+                                            onPressed: () => _moveImageLeft(index),
+                                            iconSize: 30,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  Expanded(
+                                    child: Center(
+                                      child: Container(
+                                        margin: const EdgeInsets.only(bottom: 8),
+                                        height: 30,
+                                        width: 50,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFF4343),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: FittedBox(
+                                          fit: BoxFit.contain,
+                                          child: IconButton(
+                                            icon: const Icon(Icons.delete, color: Colors.white),
+                                            onPressed: () => _deleteImage(index - 1),
+                                            iconSize: 30,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  if (index < _selectedImages.length) // Tampilkan button ">" jika index gambar bukan yang terakhir
+                                    Center(
+                                      child: Container(
+                                        margin: const EdgeInsets.only(bottom: 8, right: 16),
+                                        height: 30,
+                                        width: 30,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: FittedBox(
+                                          fit: BoxFit.contain,
+                                          child: IconButton(
+                                            icon: const Icon(Icons.arrow_forward),
+                                            onPressed: () => _moveImageRight(index),
+                                            iconSize: 30,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
-                  if (_selectedImages.isNotEmpty)
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 300, // Adjust the height as needed
-                          child: PageView.builder(
-                            controller: _pageController,
-                            itemCount: _selectedImages.length,
-                            onPageChanged: (int page) {
-                              setState(() {
-                                _currentPage = page;
-                              });
-                            },
-                            itemBuilder: (context, index) {
-                              return Stack(
-                                children: [
-                                  Center(
-                                    child: Image.file(_selectedImages[_currentPage]),
-                                  ),
-                                  // Button Back ("<")
-                                  Align(
-                                    alignment: Alignment.bottomLeft,
-                                    child: IconButton(
-                                      icon: const Icon(Icons.arrow_back),
-                                      onPressed: () {
-                                        if (_currentPage > 0) {
-                                          setState(() {
-                                            _selectedImages.insert(
-                                              _currentPage - 1,
-                                              _selectedImages.removeAt(_currentPage),
-                                            );
-                                            _currentPage--;
-                                          });
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  // Button Delete
-                                  Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: IconButton(
-                                      icon: const Icon(Icons.delete, color: Colors.red),
-                                      onPressed: () {
-                                        setState(() {
-                                          _selectedImages.removeAt(_currentPage);
-                                          _pageController = PageController(initialPage: 0);
-                                          if (_currentPage > 0) {
-                                            _currentPage--;
-                                          }
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                  // Button Front (">")
-                                  Align(
-                                    alignment: Alignment.bottomRight,
-                                    child: IconButton(
-                                      icon: const Icon(Icons.arrow_forward),
-                                      onPressed: () {
-                                        if (_currentPage < _selectedImages.length - 1) {
-                                          setState(() {
-                                            _selectedImages.insert(
-                                              _currentPage + 1,
-                                              _selectedImages.removeAt(_currentPage),
-                                            );
-                                            _currentPage++;
-                                          });
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        DotsIndicator(
-                          dotsCount: _selectedImages.length,
-                          position: _currentPage.toDouble(),
-                          decorator: DotsDecorator(
-                            size: const Size.square(8.0),
-                            activeSize: const Size(20.0, 8.0),
-                            activeShape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                 ],
               ),
               const SizedBox(height: 16),
+              // Deskripsi Catatan
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -253,10 +292,12 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                 ],
               ),
               const SizedBox(height: 16),
+              // Tags
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextField(
+                    controller: _tagController,
                     decoration: InputDecoration(
                       prefixIcon: Image.asset(
                         'assets/images/tag.png',
@@ -277,8 +318,47 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                         borderSide: BorderSide.none,
                       ),
                     ),
+                    onSubmitted: (tag) {
+                      if (tag.isNotEmpty) {
+                        _addTag(tag);
+                      }
+                    },
                   ),
                   const SizedBox(height: 8),
+                  Wrap(
+                    children: _tags.map((tag) {
+                      return Container(
+                        margin: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF31B057),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              tag,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            const SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _tags.remove(tag);
+                                });
+                              },
+                              child: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),

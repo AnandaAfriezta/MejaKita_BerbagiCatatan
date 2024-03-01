@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'widget/header.dart';
 import 'dart:convert';
@@ -76,7 +75,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
           // Menampilkan widget loading ketika data masih diambil
           return Center(
             child: CircularProgressIndicator(
-              color: Color(0xFF31B057),
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
             ),
           );
         } else if (snapshot.hasError) {
@@ -136,7 +135,6 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                                               child: buildImageWithFallback(
                                                 catatanData.images[index + i].imageUrl,
                                                 catatanData.images[index + i].imagePreview,
-                                                itemCount,
                                               ),
                                           ),
                                         ),
@@ -202,36 +200,34 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
     );
   }
 
-  Widget buildImageWithFallback(String imageUrl, String imagePreview, int itemCount) {
+  Widget buildImageWithFallback(String imageUrl, String fallbackUrl) {
     print('Building image: $imageUrl');
     double screenWidth = MediaQuery.of(context).size.width;
 
-    bool isSingleItem = itemCount == 1;
-
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      placeholder: (context, url) {
-        // Placeholder logic (optional)
-        return Image.memory(
-          base64Decode(imagePreview),
-          fit: BoxFit.fitHeight,
-          width: isSingleItem ? screenWidth : null,
-          height: isSingleItem ? screenWidth / 1.41 : null,
+    return Image.network(
+      imageUrl,
+      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        } else {
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                  : null,
+            ),
+          );
+        }
+      },
+      errorBuilder: (context, error, stackTrace) {
+        print('Error loading image, falling back to: $fallbackUrl');
+        return Image.network(
+          fallbackUrl,
+          fit: BoxFit.cover,
+          width: screenWidth > 640 ? screenWidth / 2 : null,
+          height: screenWidth > 640 ? null : screenWidth / 1.41,
         );
       },
-      errorWidget: (context, url, error) {
-        // Fallback logic (optional)
-        print('Error loading image, falling back to placeholder');
-        return Image.memory(
-          base64Decode(imagePreview),
-          fit: BoxFit.fitHeight,
-          width: isSingleItem ? screenWidth : null,
-          height: isSingleItem ? screenWidth / 1.41 : null,
-        );
-      },
-      fit: BoxFit.fitHeight,
-      width: isSingleItem ? screenWidth : null,
-      height: isSingleItem ? screenWidth / 1.41 : null,
     );
   }
 }
