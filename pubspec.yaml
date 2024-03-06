@@ -31,7 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts: ^2.1.0
-  image_picker: ^0.8.4+3
+  image_picker: ^0.8.4+4
+  dio: ^4.0.0
   dots_indicator: ^2.0.0
   http: ^0.13.6
   image_cropper: ^1.4.0
