@@ -1,20 +1,24 @@
-import 'package:berbagi_catatan/widget/header.dart';
+import 'dart:convert';
+import 'package:berbagi_catatan/main.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io'; // Import header.dart di sini
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:berbagi_catatan/widget/header.dart';
 
 class AddCatatanPage extends StatefulWidget {
-  const AddCatatanPage({Key? key, required Map<String, dynamic>? loginData}) : super(key: key);
+  const AddCatatanPage({Key? key, Map<String, dynamic>? loginData}) : super(key: key);
 
   @override
   _AddCatatanPageState createState() => _AddCatatanPageState();
 }
 
-
 class _AddCatatanPageState extends State<AddCatatanPage> {
-
   final List<File> _selectedImages = [];
   final picker = ImagePicker();
+  final TextEditingController _judulController = TextEditingController();
+  final TextEditingController _deskripsiController = TextEditingController();
   final TextEditingController _tagController = TextEditingController();
   final List<String> _tags = [];
 
@@ -61,6 +65,49 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
     });
   }
 
+  Future<void> _uploadCatatan() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? loginData = prefs.getString('userData');
+
+    if (loginData != null) {
+      final Map<String, dynamic> userData = jsonDecode(loginData);
+      final String token = userData['data']['token'];
+
+      final url = Uri.parse('https://service-catatan.mejakita.com/catatan');
+      final catatanData = {
+        'title': _judulController.text,
+        'description': _deskripsiController.text,
+        'tags': _tags,
+        'images': _selectedImages,
+        // tambahkan data lain yang dibutuhkan untuk catatan
+      };
+      print(catatanData);
+
+      final response = await http.post(
+        url,
+        body: jsonEncode(catatanData),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 201) {
+        print(response.statusCode);
+        // Berhasil mengunggah catatan, lakukan sesuatu
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MyApp()), // Ganti MainScreen() dengan halaman utama Anda
+        );
+      } else {
+        print(response.statusCode);
+        print(response.body);
+        print(catatanData);
+      }
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,7 +118,6 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Judul Catatan
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -93,15 +139,11 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                     ),
                     child: Row(
                       children: [
-                        Image.asset(
-                          'assets/images/news.png',
-                          width: 17,
-                          height: 17,
-                        ),
                         const SizedBox(width: 16.0),
-                        const Expanded(
+                        Expanded(
                           child: TextField(
-                            decoration: InputDecoration(
+                            controller: _judulController,
+                            decoration: const InputDecoration(
                               hintText: 'Judul Catatan',
                               hintStyle: TextStyle(
                                 fontFamily: 'Nunito',
@@ -119,7 +161,6 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              // Gambar Catatan
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -187,7 +228,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  if (index > 1) // Tampilkan button "<" jika index gambar bukan yang pertama
+                                  if (index > 1)
                                     Center(
                                       child: Container(
                                         margin: const EdgeInsets.only(bottom: 8, left: 16),
@@ -228,7 +269,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                                       ),
                                     ),
                                   ),
-                                  if (index < _selectedImages.length) // Tampilkan button ">" jika index gambar bukan yang terakhir
+                                  if (index < _selectedImages.length)
                                     Center(
                                       child: Container(
                                         margin: const EdgeInsets.only(bottom: 8, right: 16),
@@ -259,7 +300,6 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              // Deskripsi Catatan
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -274,6 +314,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                   ),
                   const SizedBox(height: 8),
                   TextField(
+                    controller: _deskripsiController,
                     maxLines: 3,
                     decoration: InputDecoration(
                       hintText: 'Jelaskan isi catatan yang kamu berikan...',
@@ -294,7 +335,6 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              // Tags
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -432,9 +472,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                 child: InkWell(
                   splashColor: Colors.white.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  onTap: _uploadCatatan,
                   child: const SizedBox(
                     height: 45,
                     width: 150,
