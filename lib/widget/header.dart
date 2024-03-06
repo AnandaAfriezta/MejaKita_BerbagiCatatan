@@ -72,7 +72,8 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                 },
                 child: const CircleAvatar(
                   radius: 20,
-                  backgroundImage: AssetImage('assets/images/profile.png'),
+                  backgroundImage: AssetImage('assets/images/guest.png'),
+                  backgroundColor: Colors.white,
                 ),
               ),
             ],

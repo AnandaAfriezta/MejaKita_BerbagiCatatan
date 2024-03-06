@@ -133,41 +133,32 @@ class CardTemplate extends StatelessWidget {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            if (catatanData['image_count'] != null)
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    'assets/images/article.png',
-                                    width: 30,
-                                    height: 30,
-                                  ),
-                                  Text(
-                                    '${catatanData['image_count']} Halaman',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'Nunito',
-                                      fontSize: 12,
-                                      color: Color(0xFFA1A1A1),
-                                    ),
-                                  ),
-                                ],
+                            Image.asset(
+                              'assets/images/article.png',
+                              width: 30,
+                              height: 30,
+                            ),
+                            Text(
+                              '${catatanData['image_count']} Halaman',
+                              style: const TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 12,
+                                color: Color(0xFFA1A1A1),
                               ),
+                            ),
                             const SizedBox(width: 8),
+                            Icon(Icons.access_time, size: 16, color: Color(0xFFA1A1A1)),
+                            const SizedBox(width: 4),
                             Expanded(
-                              child: Row(
-                                children: [
-                                  Icon(Icons.access_time, size: 16, color: Color(0xFFA1A1A1)),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    calculateTimeDifference(catatanData['created_at']),
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'Nunito',
-                                      fontSize: 12,
-                                      color: Color(0xFFA1A1A1),
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                calculateTimeDifference(catatanData['created_at']),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: 12,
+                                  color: Color(0xFFA1A1A1),
+                                ),
                               ),
                             ),
                           ],
