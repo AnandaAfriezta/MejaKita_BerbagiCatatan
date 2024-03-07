@@ -40,6 +40,9 @@ class _CustomBodyState extends State<CustomBody> {
   bool allDataLoaded = false;
   int availablePage = 1;
 
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  GlobalKey<RefreshIndicatorState>();
+
   @override
   void initState() {
     super.initState();
@@ -50,12 +53,12 @@ class _CustomBodyState extends State<CustomBody> {
     final Uri apiUrl = Uri.parse(
         'https://service-catatan.mejakita.com/catatan?itemPerPage=$itemsPerPage&page=$currentPage'
     );
-    print("API URL: $apiUrl");    final response = await http.get(apiUrl);
+    print("API URL: $apiUrl");
+    final response = await http.get(apiUrl);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
       setState(() {
-        // Append new data to the existing list
         catatanList.addAll(List<Map<String, dynamic>>.from(data['data']));
         availablePage = data['pagination']['availablePage'];
         isLoading = false;
@@ -64,6 +67,21 @@ class _CustomBodyState extends State<CustomBody> {
     } else {
       throw Exception('Failed to load Data');
     }
+  }
+
+  Future<void> _handleRefresh() async {
+    setState(() {
+      isLoading = true;
+      currentPage = 1;
+      catatanList.clear();
+      allDataLoaded = false;
+    });
+
+    await fetchCatatanData();
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   bool _onScrollNotification(ScrollNotification notification) {
@@ -92,149 +110,154 @@ class _CustomBodyState extends State<CustomBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const CustomHeader(isHomePage: true, isLoggedIn: false,),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  constraints: const BoxConstraints(
-                    minHeight: 40,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[100],
-                  ),
-                  child: const TextField(
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Cari catatan...',
-                      hintStyle: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 16.0,
-                        fontStyle: FontStyle.normal,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.grey,
+    return RefreshIndicator(
+      key: _refreshIndicatorKey,
+      onRefresh: _handleRefresh,
+      color: Color(0xFF31B057),
+      child: Column(
+        children: [
+          const CustomHeader(isHomePage: true,),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      minHeight: 40,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey[100],
+                    ),
+                    child: const TextField(
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Cari catatan...',
+                        hintStyle: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 16.0,
+                          fontStyle: FontStyle.normal,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.grey,
+                        ),
+                        icon: Icon(Icons.search),
                       ),
-                      icon: Icon(Icons.search),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              InkWell(
-                onTap: () {},
-                child: Ink(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: const Color(0xFF31B057),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0xFF237D3E),
-                        offset: Offset(0, 4),
-                        blurRadius: 0,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    splashColor: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () {
-                      // Tambahkan logika untuk tombol cari di sini
-                    },
-                    child: const SizedBox(
-                      height: 45,
-                      width: 80,
-                      child: Center(
-                        child: Text(
-                          'Cari',
-                          style: TextStyle(
-                            fontFamily: 'Nunito',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
-                            color: Colors.white,
+                const SizedBox(width: 10),
+                InkWell(
+                  onTap: () {},
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: const Color(0xFF31B057),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0xFF237D3E),
+                          offset: Offset(0, 4),
+                          blurRadius: 0,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: InkWell(
+                      splashColor: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {
+                        // Tambahkan logika untuk tombol cari di sini
+                      },
+                      child: const SizedBox(
+                        height: 45,
+                        width: 80,
+                        child: Center(
+                          child: Text(
+                            'Cari',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        Expanded(
-          child: isLoading
-              ? const Center(
-            child: CircularProgressIndicator(
-              color: Color(0xFF31B057),
+              ],
             ),
-          )
-              : LayoutBuilder(
-            builder: (context, constraints) {
-              final isMobile = constraints.maxWidth < 640;
-              int itemCount = isMobile
-                  ? currentPage * itemsPerPage
-                  : catatanList.length;
-
-              return NotificationListener<ScrollNotification>(
-                  onNotification: _onScrollNotification,
-                  child: isMobile
-                      ? ListView.builder(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: itemCount + (allDataLoaded ? 0 : 1),
-                    itemBuilder: (context, index) {
-                      if (index == catatanList.length &&
-                          !allDataLoaded) {
-                        return _buildLoadingIndicator();
-                      }
-                      return index < catatanList.length
-                          ? CardTemplate(
-                        catatanData: catatanList[index],
-                      )
-                          : null;
-                    },
-                  )
-                      : GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16.0,
-                      mainAxisSpacing: 16.0,
-                      childAspectRatio: 2.2,
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: itemCount,
-                    itemBuilder: (context, index) {
-                      if (index == itemCount - 1 && !allDataLoaded) {
-                        return SizedBox(
-                          height: 200, // Set the height as needed
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFF31B057),
-                            ),
-                          ),
-                        );
-                      }
-                      return index < catatanList.length
-                          ? CardTemplate(
-                        catatanData: catatanList[index],
-                      )
-                          : null; // Return null for the items beyond the list length
-                    },
-                  )
-              );
-            },
           ),
-        ),
-      ],
+          const SizedBox(height: 10),
+          Expanded(
+            child: isLoading
+                ? const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF31B057),
+              ),
+            )
+                : LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 640;
+                int itemCount = isMobile
+                    ? currentPage * itemsPerPage
+                    : catatanList.length;
+
+                return NotificationListener<ScrollNotification>(
+                    onNotification: _onScrollNotification,
+                    child: isMobile
+                        ? ListView.builder(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: itemCount + (allDataLoaded ? 0 : 1),
+                      itemBuilder: (context, index) {
+                        if (index == catatanList.length &&
+                            !allDataLoaded) {
+                          return _buildLoadingIndicator();
+                        }
+                        return index < catatanList.length
+                            ? CardTemplate(
+                          catatanData: catatanList[index],
+                        )
+                            : null;
+                      },
+                    )
+                        : GridView.builder(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16.0,
+                        mainAxisSpacing: 16.0,
+                        childAspectRatio: 2.2,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: itemCount,
+                      itemBuilder: (context, index) {
+                        if (index == itemCount - 1 && !allDataLoaded) {
+                          return SizedBox(
+                            height: 200, // Set the height as needed
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF31B057),
+                              ),
+                            ),
+                          );
+                        }
+                        return index < catatanList.length
+                            ? CardTemplate(
+                          catatanData: catatanList[index],
+                        )
+                            : null;
+                      },
+                    )
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

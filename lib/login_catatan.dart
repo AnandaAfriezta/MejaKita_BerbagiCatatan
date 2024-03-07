@@ -27,43 +27,60 @@ class _LoginPageState extends State<LoginPage> {
       headers: <String, String>{'authorization': basicAuth},
     );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      if (data['messages'] == 'user.USER FOUND') {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userData', jsonEncode(data));
-        print(jsonEncode(data));
+    final data = json.decode(response.body);
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MyApp()),
-        );
-      } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Login Gagal'),
-              content: const Text('Email atau password yang Anda masukkan salah.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    } else {
+    if (data['messages'] == 'user.USER FOUND') {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userData', jsonEncode(data));
+      print(jsonEncode(data));
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MyApp()),
+      );
+    } else if(data['messages'] == 'common.PASSWORD_FAILED') {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Error'),
-            content: Text('Terjadi kesalahan saat mengirim permintaan: ${response.reasonPhrase}'),
+            title: const Text('Login Gagal'),
+            content: const Text('password yang Anda masukkan salah.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } else if(data['messages'] == 'common.DATA_NOT_FOUND') {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Login Gagal'),
+            content: const Text('email yang Anda masukkan salah.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Login Gagal'),
+            content: const Text('Field belum diisi'),
             actions: [
               TextButton(
                 onPressed: () {
