@@ -6,6 +6,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:berbagi_catatan/widget/header.dart';
+import 'package:path/path.dart' as path;
+import 'package:http_parser/http_parser.dart';
 
 class AddCatatanPage extends StatefulWidget {
   const AddCatatanPage({Key? key, Map<String, dynamic>? loginData}) : super(key: key);
@@ -31,6 +33,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
       });
     }
   }
+
 
   void _deleteImage(int index) {
     setState(() {
@@ -58,12 +61,24 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
     }
   }
 
+
   void _addTag(String tag) {
-    setState(() {
-      _tags.add(tag);
-      _tagController.clear();
-    });
+    final String tagText = _tagController.text.trim();
+    if (tagText.isNotEmpty) {
+      setState(() {
+        _tags.add(tagText);
+        _tagController.clear();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tag tidak boleh kosong'),
+        ),
+      );
+    }
   }
+
+
 
   Future<void> _uploadCatatan() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -74,39 +89,54 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
       final String token = userData['data']['token'];
 
       final url = Uri.parse('https://service-catatan.mejakita.com/catatan');
-      final catatanData = {
-        'title': _judulController.text,
-        'description': _deskripsiController.text,
-        'tags': _tags,
-        'images': _selectedImages,
-        // tambahkan data lain yang dibutuhkan untuk catatan
-      };
-      print(catatanData);
+      var request = http.MultipartRequest('POST', url);
 
-      final response = await http.post(
-        url,
-        body: jsonEncode(catatanData),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token',
-        },
-      );
+      // Tambahkan gambar sebagai bagian dari request
+      for (var imageFile in _selectedImages) {
+        String fileName = path.basename(imageFile.path);
+        var stream = http.ByteStream(imageFile.openRead());
+        var length = await imageFile.length();
+
+        var multipartFile = http.MultipartFile(
+          'images[]',
+          stream,
+          length,
+          filename: fileName,
+          contentType: MediaType('image', 'jpg'), // Tipe konten ditambahkan di sini
+        );
+        request.files.add(multipartFile);
+      }
+
+      request.fields['title'] = _judulController.text;
+      request.fields['description'] = _deskripsiController.text;
+
+      for (var tag in _tags) {
+        request.fields['tags[]'] = tag;
+      }
+
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+      });
+
+      print('Uploading catatan...');
+      var response = await request.send();
+      print('Response status code: ${response.statusCode}');
 
       if (response.statusCode == 201) {
-        print(response.statusCode);
-        // Berhasil mengunggah catatan, lakukan sesuatu
+        print('Catatan successfully uploaded');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MyApp()), // Ganti MainScreen() dengan halaman utama Anda
+          MaterialPageRoute(builder: (context) => const MyApp()),
         );
       } else {
-        print(response.statusCode);
-        print(response.body);
-        print(catatanData);
+        print('Failed to upload catatan');
+
+        // Print the error message from the server
+        final responseString = await response.stream.bytesToString();
+        print('Error message: $responseString');
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
