@@ -111,7 +111,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomHeader(isHomePage: false, isLoggedIn: false,),
+      appBar: const CustomHeader(isHomePage: false),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

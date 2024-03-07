@@ -12,16 +12,17 @@ import 'widget/FullScreenImageView.dart';
 
 class DetailCatatanPage extends StatelessWidget {
   final String slug;
+  final String? userToken;
 
-  DetailCatatanPage({required this.slug});
+  DetailCatatanPage({required this.slug,this.userToken });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomHeader(isHomePage: false, isLoggedIn: false,),
+      appBar: const CustomHeader(isHomePage: false),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: DetailCatatanWidget(slug: slug),
+        child: DetailCatatanWidget(slug: slug, userToken: userToken,),
       ),
     );
   }
@@ -29,8 +30,9 @@ class DetailCatatanPage extends StatelessWidget {
 
 class DetailCatatanWidget extends StatefulWidget {
   final String slug;
+  final String? userToken;
 
-  DetailCatatanWidget({required this.slug});
+  DetailCatatanWidget({required this.slug, this.userToken});
   @override
   _DetailCatatanWidgetState createState() => _DetailCatatanWidgetState();
 }
@@ -39,6 +41,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
   late Future<CatatanData> catatanDataFuture;
   int currentPage = 0;
   late PageController _pageController;
+  bool? ownerShip;
 
   @override
   void initState() {
@@ -56,15 +59,29 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
   // Function to fetch data from the API
   Future<CatatanData> fetchDataUrls() async {
     final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/${widget.slug}');
+    final headers = <String, String>{};
+    print('token get: ${widget.userToken}');  // Ubah bagian ini
 
-    final response = await http.get(apiUrl);
+    // Tambahkan header Authorization jika userToken ada
+    if (widget.userToken != null && widget.userToken!.isNotEmpty) {
+      headers['Authorization'] = 'Bearer ${widget.userToken}';
+    }
+
+    final response = await http.get(apiUrl, headers: headers);
+
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body)['data'];
+      final catatanData = CatatanData.fromJson(responseData['catatanData']);
+      ownerShip = responseData['ownerShip'];
+      print('ownership: $ownerShip');
       return CatatanData.fromJson(responseData['catatanData']);
     } else {
       throw Exception('Failed to load Data');
     }
+
+
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +180,130 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      Visibility(
+                        visible: ownerShip == true, // Check if ownerShip is a boolean true
+                        child: Row(
+
+                          children: [
+                            // Edit button
+                            InkWell(
+                              onTap: () {
+                                // Handle edit button click
+                              },
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: const Color(0xFF31B057),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0xFF237D3E),
+                                      offset: Offset(0, 4),
+                                      blurRadius: 0,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                                child: InkWell(
+                                  splashColor: Colors.white.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(8),
+                                  onTap: () {
+                                    // Handle edit button click
+                                  },
+                                  child: SizedBox(
+                                    height: 40,
+                                    width: 100, // Adjust the height and width as needed
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align to start and end
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
+                                          child: Icon(
+                                            Icons.edit,
+                                            size: 18,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Edit',
+                                          style: TextStyle(
+                                            fontFamily: 'Nunito',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16.0,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10), // Add some spacing between buttons
+
+                            // Delete button
+                            InkWell(
+                              onTap: () {
+                                // Handle edit button click
+                              },
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: const Color(0xFFFF4343),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0xFFBC3434),
+                                      offset: Offset(0, 4),
+                                      blurRadius: 0,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                                child: InkWell(
+                                  splashColor: Colors.white.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(8),
+                                  onTap: () {
+                                    // Handle edit button click
+                                  },
+                                  child: SizedBox(
+                                    height: 40,
+                                    width: 120, // Adjust the height and width as needed
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align to start and end
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
+                                          child: Icon(
+                                            Icons.archive,
+                                            size: 18,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Delete',
+                                          style: TextStyle(
+                                            fontFamily: 'Nunito',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16.0,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(height: 10),
                       CollapsibleDescription(summary: catatanData.summary),
                       const SizedBox(height: 10),
@@ -230,7 +371,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       },
       fit: BoxFit.fitHeight,
       width: isSingleItem ? screenWidth : null,
-      height: isSingleItem ? screenWidth / 1.41 : null,
+
     );
   }
 }

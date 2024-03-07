@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../detail_catatan.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -10,7 +11,7 @@ class CardTemplate extends StatelessWidget {
   CardTemplate({
     Key? key,
     required this.catatanData,
-    this.cardHeight = 185.0, // Default card height, adjust as needed
+    this.cardHeight = 185.0,
   }) : super(key: key);
 
   String calculateTimeDifference(String createdAt) {
@@ -25,17 +26,11 @@ class CardTemplate extends StatelessWidget {
       int months = (difference.inDays / 30).floor();
       return '$months ${months == 1 ? 'bulan' : 'bulan'} yang lalu';
     } else if (difference.inDays >= 1) {
-      return '${difference.inDays} ${difference.inDays == 1
-          ? 'hari'
-          : 'hari'} yang lalu';
+      return '${difference.inDays} ${difference.inDays == 1 ? 'hari' : 'hari'} yang lalu';
     } else if (difference.inHours >= 1) {
-      return '${difference.inHours} ${difference.inHours == 1
-          ? 'jam'
-          : 'jam'} yang lalu';
+      return '${difference.inHours} ${difference.inHours == 1 ? 'jam' : 'jam'} yang lalu';
     } else if (difference.inMinutes >= 1) {
-      return '${difference.inMinutes} ${difference.inMinutes == 1
-          ? 'menit'
-          : 'menit'} yang lalu';
+      return '${difference.inMinutes} ${difference.inMinutes == 1 ? 'menit' : 'menit'} yang lalu';
     } else {
       return 'Baru saja';
     }
@@ -55,20 +50,41 @@ class CardTemplate extends StatelessWidget {
     return FutureBuilder<bool>(
       future: isImageUrlLoaded(catatanData['thumbnail']['image_url'] ?? ''),
       builder: (context, snapshot) {
-
         return SizedBox(
           height: cardHeight,
           child: Card(
             color: Colors.white,
             elevation: 0,
             child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailCatatanPage(slug: catatanData['slug']),
-                  ),
-                );
+              onTap: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                String userData = prefs.getString('userData') ?? '';
+
+                try {
+                  Map<String, dynamic> userDataMap = json.decode(userData);
+                  String token = userDataMap['data']['token'] ?? '';
+
+                  print('Token send: $token');
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetailCatatanPage(
+                        slug: catatanData['slug'],
+                        userToken: token,
+                      ),
+                    ),
+                  );
+                } catch (e) {
+                  print('Error decoding user data: $e');
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetailCatatanPage(slug: catatanData['slug']),
+                    ),
+                  );
+                }
               },
               child: Row(
                 children: [
@@ -80,28 +96,42 @@ class CardTemplate extends StatelessWidget {
                     ),
                     child: Stack(
                       children: [
-                        // Display image_preview
-                    ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                        child: Image.memory(
-                          base64.decode(catatanData['thumbnail']['image_preview']),
-                          fit: BoxFit.cover,
-                          width: 125,
-                          height: cardHeight,
+                        if (catatanData['thumbnail']['image_preview'] != null)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.memory(
+                              base64.decode(catatanData['thumbnail']['image_preview']),
+                              fit: BoxFit.cover,
+                              width: 125,
+                              height: cardHeight,
+                            ),
+                          )
+                        else
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            color: Colors.grey[300],
+                            width: 125,
+                            height: cardHeight,
+                          ),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: catatanData['thumbnail']['image_url'] != null
+                              ? CachedNetworkImage(
+                            imageUrl: catatanData['thumbnail']['image_url'],
+                            placeholder: (context, url) => Container(),
+                            errorWidget: (context, url, error) => Container(),
+                            fit: BoxFit.cover,
+                            width: 125,
+                            height: cardHeight,
+                          )
+                              : Container(
+                            color: Colors.grey[300],
+                            width: 125,
+                            height: cardHeight,
+                          ),
                         ),
-                    ),
-                        // Display image_url on top, hide it initially
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                       child: CachedNetworkImage(
-                          imageUrl: catatanData['thumbnail']['image_url'],
-                          placeholder: (context, url) => Container(),
-                          errorWidget: (context, url, error) => Container(),
-                          fit: BoxFit.cover,
-                          width: 125,
-                          height: cardHeight,
-                        ),
-                      ),
                       ],
                     ),
                   ),
@@ -124,6 +154,8 @@ class CardTemplate extends StatelessWidget {
                         const SizedBox(height: 8),
                         Text(
                           catatanData['owner']['name'],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontFamily: 'Nunito',
                             fontSize: 16,

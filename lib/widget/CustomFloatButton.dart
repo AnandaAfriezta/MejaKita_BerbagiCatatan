@@ -48,7 +48,7 @@ class CustomFloatingActionButton extends StatelessWidget {
               );
             } else {
               // Redirect to login page if login data is not available
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => LoginPage(),
