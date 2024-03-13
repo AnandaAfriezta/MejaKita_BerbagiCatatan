@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'main.dart';
 import 'widget/header.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -13,8 +14,9 @@ import 'widget/FullScreenImageView.dart';
 class DetailCatatanPage extends StatelessWidget {
   final String slug;
   final String? userToken;
+  final String id;
 
-  DetailCatatanPage({required this.slug,this.userToken });
+  DetailCatatanPage({required this.slug,this.userToken, required this.id });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class DetailCatatanPage extends StatelessWidget {
       appBar: const CustomHeader(isHomePage: false),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: DetailCatatanWidget(slug: slug, userToken: userToken,),
+        child: DetailCatatanWidget(slug: slug, userToken: userToken,id: id),
       ),
     );
   }
@@ -31,8 +33,9 @@ class DetailCatatanPage extends StatelessWidget {
 class DetailCatatanWidget extends StatefulWidget {
   final String slug;
   final String? userToken;
+  final String id;
 
-  DetailCatatanWidget({required this.slug, this.userToken});
+  DetailCatatanWidget({required this.slug, this.userToken,required this.id});
   @override
   _DetailCatatanWidgetState createState() => _DetailCatatanWidgetState();
 }
@@ -60,8 +63,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
   Future<CatatanData> fetchDataUrls() async {
     final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/${widget.slug}');
     final headers = <String, String>{};
-    print('token get: ${widget.userToken}');  // Ubah bagian ini
-
+    print(widget.id);
     // Tambahkan header Authorization jika userToken ada
     if (widget.userToken != null && widget.userToken!.isNotEmpty) {
       headers['Authorization'] = 'Bearer ${widget.userToken}';
@@ -71,17 +73,90 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body)['data'];
-      final catatanData = CatatanData.fromJson(responseData['catatanData']);
+      //final catatanData = CatatanData.fromJson(responseData['catatanData']);
       ownerShip = responseData['ownerShip'];
       print('ownership: $ownerShip');
       return CatatanData.fromJson(responseData['catatanData']);
     } else {
       throw Exception('Failed to load Data');
     }
-
-
   }
 
+  Future<void> _deleteCatatan() async {
+    if (widget.userToken == null || widget.userToken!.isEmpty) {
+      // Token tidak tersedia, tampilkan pesan ke pengguna
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('User token is missing'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Menampilkan dialog konfirmasi
+    bool deleteConfirmed = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Konfirmasi Hapus'),
+          content: Text('Apakah Anda yakin ingin menghapus catatan ini?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Tombol "Batal"
+                Navigator.of(context).pop(false);
+              },
+              child: Text(
+                'Batal',
+                style: TextStyle(color: Colors.black), // Warna teks "Batal"
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                // Tombol "Hapus"
+                Navigator.of(context).pop(true);
+              },
+              child: Text(
+                'Hapus',
+                style: TextStyle(color: Colors.red), // Warna teks "Hapus"
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!deleteConfirmed) {
+      // Pengguna membatalkan penghapusan
+      return;
+    }
+
+    final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/${widget.id}');
+    final headers = <String, String>{'Authorization': 'Bearer ${widget.userToken}'};
+
+    final response = await http.delete(apiUrl, headers: headers);
+
+    if (response.statusCode == 200) {
+      // Handle success, misalnya kembali ke halaman sebelumnya
+      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MyApp(), // Gantilah dengan widget MyApp yang sesuai
+        ),
+      );
+
+    } else {
+      // Handle error, misalnya tampilkan snackbar dengan pesan error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete catatan'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -185,11 +260,9 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                         child: Row(
 
                           children: [
+                            const SizedBox(height: 10),
                             // Edit button
                             InkWell(
-                              onTap: () {
-                                // Handle edit button click
-                              },
                               child: Ink(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
@@ -243,12 +316,8 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                               ),
                             ),
                             const SizedBox(width: 10), // Add some spacing between buttons
-
                             // Delete button
                             InkWell(
-                              onTap: () {
-                                // Handle edit button click
-                              },
                               child: Ink(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
@@ -266,6 +335,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                                   splashColor: Colors.white.withOpacity(0.3),
                                   borderRadius: BorderRadius.circular(8),
                                   onTap: () {
+                                    _deleteCatatan();
                                     // Handle edit button click
                                   },
                                   child: SizedBox(
@@ -301,6 +371,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                                 ),
                               ),
                             ),
+                          const SizedBox(height: 10)
                           ],
                         ),
                       ),

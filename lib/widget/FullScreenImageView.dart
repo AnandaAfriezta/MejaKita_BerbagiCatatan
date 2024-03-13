@@ -16,7 +16,7 @@ class FullScreenImageView extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             body: Center(
-              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.green)),
+              child: CircularProgressIndicator(color: Color(0xFF31B057),),
             ),
           );
         } else if (snapshot.hasError) {

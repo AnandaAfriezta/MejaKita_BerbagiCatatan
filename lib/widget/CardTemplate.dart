@@ -64,13 +64,12 @@ class CardTemplate extends StatelessWidget {
                   Map<String, dynamic> userDataMap = json.decode(userData);
                   String token = userDataMap['data']['token'] ?? '';
 
-                  print('Token send: $token');
-
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => DetailCatatanPage(
                         slug: catatanData['slug'],
+                        id: catatanData['id'],
                         userToken: token,
                       ),
                     ),
@@ -81,7 +80,10 @@ class CardTemplate extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => DetailCatatanPage(slug: catatanData['slug']),
+                      builder: (context) => DetailCatatanPage(
+                        slug: catatanData['slug'],
+                        id: catatanData['id']
+                      ),
                     ),
                   );
                 }
@@ -108,12 +110,12 @@ class CardTemplate extends StatelessWidget {
                           )
                         else
                           Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            color: Colors.grey[300],
                             width: 125,
                             height: cardHeight,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.grey[300],
+                            ),
                           ),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
