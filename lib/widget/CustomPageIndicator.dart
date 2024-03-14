@@ -50,18 +50,19 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
             itemCount: widget.itemCount,
             itemBuilder: (context, index) {
               bool isCurrentPage = index == widget.currentPage;
+              String? imageUrl = widget.imageUrls[index];
 
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: padding),
                 child: GestureDetector(
                   onTap: () {
                     // If clicking the last image indicator, move to the last page without animation
-                      // If clicking other indicators, animate as usual
-                      widget.pageController.animateToPage(
-                        index,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
+                    // If clicking other indicators, animate as usual
+                    widget.pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
                   },
                   child: Container(
                     width: indicatorWidth,
@@ -76,14 +77,16 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(5.0),
-                      child: CachedNetworkImage(
-                        imageUrl: widget.imageUrls[index],
+                      child: imageUrl != null
+                          ? CachedNetworkImage(
+                        imageUrl: imageUrl,
                         placeholder: (context, url) => _buildPlaceholder(),
                         errorWidget: (context, url, error) => _buildErrorWidget(),
                         width: indicatorWidth - 4.0, // Adjust the width to avoid overlap
                         height: 66.0, // Adjust the height to fit within the container
                         fit: BoxFit.cover,
-                      ),
+                      )
+                          : _buildPlaceholder(), // Jika imageUrl null, tampilkan placeholder
                     ),
                   ),
                 ),
@@ -105,13 +108,8 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
   Widget _buildErrorWidget() {
     // You can customize this error widget
     return Container(
-      color: Colors.red,
-      child: Center(
-        child: Icon(
-          Icons.error,
-          color: Colors.white,
-        ),
-      ),
+      color: Colors.grey,
+
     );
   }
 }

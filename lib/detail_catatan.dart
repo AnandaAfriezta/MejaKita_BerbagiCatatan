@@ -75,7 +75,6 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       final Map<String, dynamic> responseData = json.decode(response.body)['data'];
       //final catatanData = CatatanData.fromJson(responseData['catatanData']);
       ownerShip = responseData['ownerShip'];
-      print('ownership: $ownerShip');
       return CatatanData.fromJson(responseData['catatanData']);
     } else {
       throw Exception('Failed to load Data');
@@ -177,7 +176,13 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
           );
         } else {
           // Data sudah diambil, tampilkan konten utama
-          final CatatanData catatanData = snapshot.data as CatatanData;
+          final CatatanData? catatanData = snapshot.data as CatatanData?;
+          if (catatanData == null) {
+            // Jika catatanData null, tampilkan placeholder atau pesan kesalahan sesuai kebutuhan
+            return Center(
+              child: Text('Data is null'),
+            );
+          }
           print('Number of images: ${catatanData.images.length}');
 
           return LayoutBuilder(
@@ -240,11 +245,19 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                         ],
                       ),
                       const SizedBox(height: 10),
-                      CustomPageIndicator(
-                        itemCount: catatanData.images.length,
-                        currentPage: currentPage,
-                        pageController: _pageController,
-                        imageUrls: catatanData.images.map((image) => image.imageUrl).toList(),
+                      Visibility(
+                        visible: catatanData.images.isNotEmpty, // Hanya tampilkan jika terdapat gambar
+                        child: CustomPageIndicator(
+                          itemCount: catatanData.images.length,
+                          currentPage: currentPage,
+                          pageController: _pageController,
+                          imageUrls: catatanData.images.map((image) => image.imageUrl).toList(),
+                        ),
+                        replacement: Container(
+                          color: Colors.grey[300], // Warna kotak abu-abu
+                          height: 10, // Sesuaikan dengan kebutuhan
+                          width: double.infinity, // Mengisi lebar maksimum
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Text(
@@ -376,7 +389,10 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      CollapsibleDescription(summary: catatanData.summary),
+                      Visibility(
+                        visible: catatanData.summary != null && catatanData.summary.isNotEmpty,
+                        child: CollapsibleDescription(summary: catatanData.summary ?? ''),
+                      ),
                       const SizedBox(height: 10),
                       AccountInfoWidget(ownerName: catatanData.owner.name, avatarUrl: catatanData.owner.photoUrl),
                       const SizedBox(height: 10),
@@ -416,16 +432,23 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
   Widget buildImageWithFallback(String imageUrl, String imagePreview, int itemCount) {
     print('Building image: $imageUrl');
     double screenWidth = MediaQuery.of(context).size.width;
-
     bool isSingleItem = itemCount == 1;
 
+    // Cek apakah imageUrl dan imagePreview null
+    if (imageUrl == null && imagePreview == null) {
+      return Container(
+        color: Colors.grey[300], // Warna kotak abu-abu
+        width: isSingleItem ? screenWidth : null,
+        height: isSingleItem ? screenWidth / 1.41 : null,
+      );
+    }
+
     return CachedNetworkImage(
-      imageUrl: imageUrl,
+      imageUrl: imageUrl ?? imagePreview, // Gunakan imagePreview sebagai fallback jika imageUrl null
       placeholder: (context, url) {
         // Placeholder logic (optional)
-        return Image.memory(
-          base64Decode(imagePreview),
-          fit: BoxFit.fitHeight,
+        return Container(
+          color: Colors.grey[300], // Warna kotak abu-abu
           width: isSingleItem ? screenWidth : null,
           height: isSingleItem ? screenWidth / 1.41 : null,
         );
@@ -433,18 +456,17 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       errorWidget: (context, url, error) {
         // Fallback logic (optional)
         print('Error loading image, falling back to placeholder');
-        return Image.memory(
-          base64Decode(imagePreview),
-          fit: BoxFit.fitHeight,
+        return Container(
+          color: Colors.grey[300], // Warna kotak abu-abu
           width: isSingleItem ? screenWidth : null,
           height: isSingleItem ? screenWidth / 1.41 : null,
         );
       },
       fit: BoxFit.fitHeight,
       width: isSingleItem ? screenWidth : null,
-
     );
   }
+
 }
 
 class CatatanData {
@@ -457,7 +479,7 @@ class CatatanData {
 
   CatatanData({
     required this.title,
-    required this.summary,
+    this.summary = '',
     required this.description,
     required this.owner,
     required this.images,
@@ -465,12 +487,12 @@ class CatatanData {
   });
 
   CatatanData.fromJson(Map<String, dynamic> json) {
-    title = json['title'];
-    summary = json['summary'];
-    description = json['description'];
+    title = json['title'] ?? ''; // Jika title null, berikan string kosong
+    summary = json['summary'] ?? ''; // Jika summary null, berikan string kosong
+    description = json['description'] ?? ''; // Jika description null, berikan string kosong
     owner = Owner.fromJson(json['owner']);
-    images = List<ImageData>.from(json['images'].map((item) => ImageData.fromJson(item)));
-    tag = List<String>.from(json['tag']);
+    images = (json['images'] as List<dynamic>? ?? []).map((item) => ImageData.fromJson(item)).toList();
+    tag = (json['tag'] as List<dynamic>? ?? []).map((tag) => tag.toString()).toList();
   }
 }
 
@@ -493,7 +515,7 @@ class ImageData {
   ImageData({required this.imageUrl, required this.imagePreview});
 
   ImageData.fromJson(Map<String, dynamic> json) {
-    imageUrl = json['image_url'];
-    imagePreview = json['image_preview'];
+    imageUrl = json['image_url'] ?? '';
+    imagePreview = json['image_preview'] ?? '';
   }
 }
