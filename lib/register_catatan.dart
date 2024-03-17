@@ -1,101 +1,32 @@
 import 'dart:convert';
-import 'package:berbagi_catatan/register_catatan.dart';
+import 'package:berbagi_catatan/login_catatan.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'main.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
+  String? _nameError;
   String? _emailError;
   String? _passwordError;
+  String? _confirmPasswordError;
 
-  Future<void> _login() async {
-    final url = Uri.parse('https://service2.mejakita.com/login/user');
-    final String basicAuth = 'Basic ' +
-        base64Encode(utf8
-            .encode('${_emailController.text}:${_passwordController.text}'));
-
-    final response = await http.post(
-      url,
-      headers: <String, String>{'authorization': basicAuth},
+  Future<void> _register() async {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
     );
-
-    final data = json.decode(response.body);
-
-    if (data['messages'] == 'user.USER FOUND') {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userData', jsonEncode(data));
-      print(jsonEncode(data));
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MyApp()),
-      );
-    } else if (data['messages'] == 'common.PASSWORD_FAILED') {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Login Gagal'),
-            content: const Text('password yang Anda masukkan salah.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    } else if (data['messages'] == 'common.DATA_NOT_FOUND') {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Login Gagal'),
-            content: const Text('email yang Anda masukkan salah.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Login Gagal'),
-            content: const Text('Field belum diisi'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    }
   }
 
   @override
@@ -103,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Login',
+          'Register',
           style: TextStyle(
             fontFamily: 'Nunito',
             fontSize: 20,
@@ -117,6 +48,45 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              'Nama',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 14.0,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.only(left: 16.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFFF3F4F6),
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 16.0),
+                  Expanded(
+                    child: TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        hintText: 'Masukkan nama Anda',
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                        border: InputBorder.none,
+                        errorText: _nameError,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
             const Text(
               'Email',
               style: TextStyle(
@@ -195,24 +165,45 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            const Text(
+              'Ulangi Password',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 14.0,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                GestureDetector(
-                  onTap: () {},
-                  child: const Text(
-                    'Lupa password?',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF9CA3AF),
+            Container(
+              padding: const EdgeInsets.only(left: 16.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFFF3F4F6),
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 16.0),
+                  Expanded(
+                    child: TextField(
+                      controller: _confirmPasswordController,
+                      decoration: InputDecoration(
+                        hintText: 'Ketikkan ulang password',
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                        border: InputBorder.none,
+                        errorText: _confirmPasswordError,
+                      ),
+                      obscureText: true,
                     ),
-                    textAlign: TextAlign.end,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             AnimatedContainer(
@@ -234,13 +225,13 @@ class _LoginPageState extends State<LoginPage> {
                 child: InkWell(
                   splashColor: Colors.white.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
-                  onTap: _login,
+                  onTap: _register,
                   child: const SizedBox(
                     height: 45,
                     width: double.infinity,
                     child: Center(
                       child: Text(
-                        'Masuk',
+                        'Daftar',
                         style: TextStyle(
                           fontFamily: 'Nunito',
                           fontWeight: FontWeight.bold,
@@ -251,38 +242,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const RegisterPage()),
-                );
-              },
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Belum punya akun? ',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF9CA3AF),
-                    ),
-                  ),
-                  Text(
-                    'Daftar sekarang',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF31B057),
-                    ),
-                  ),
-                ],
               ),
             ),
           ],
