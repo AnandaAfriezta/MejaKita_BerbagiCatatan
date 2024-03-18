@@ -110,9 +110,17 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
       request.fields['title'] = _judulController.text;
       request.fields['description'] = _deskripsiController.text;
 
-      for (var tag in _tags) {
-        request.fields['tags[]'] = tag;
-      }
+      // Split string input berdasarkan karakter newline ("\n")
+      List<String> tagList = _tagController.text.split('\n');
+
+      // Tambahkan setiap tag yang dipisahkan ke dalam list _tags
+      _tags.addAll(tagList);
+
+      // Gabungkan semua tag menjadi satu string dipisahkan oleh koma dan spasi
+      String combinedTags = _tags.join(', ');
+
+      // Tambahkan string tag yang digabungkan ke request
+      request.fields['tags[]'] = combinedTags;
 
       request.headers.addAll({
         'Authorization': 'Bearer $token',
@@ -368,6 +376,16 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Text(
+                    'Tags',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   TextField(
                     controller: _tagController,
                     decoration: InputDecoration(
@@ -376,7 +394,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                         width: 17,
                         height: 17,
                       ),
-                      hintText: 'Ketikkan Tags',
+                      hintText: 'Ketikkan Tags (enter untuk submit)',
                       hintStyle: const TextStyle(
                         fontFamily: 'Nunito',
                         fontSize: 16.0,
