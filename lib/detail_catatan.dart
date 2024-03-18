@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'main.dart';
 import 'widget/header.dart';
+import 'edit_catatan.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'widget/CustomPageIndicator.dart';
@@ -10,6 +11,7 @@ import 'widget/CollapsibleDescription.dart';
 import 'widget/AccountInfoWidget.dart';
 import 'widget/Tag.dart';
 import 'widget/FullScreenImageView.dart';
+
 
 class DetailCatatanPage extends StatelessWidget {
   final String slug;
@@ -51,6 +53,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
     super.initState();
     _pageController = PageController(initialPage: currentPage, viewportFraction: 1.0);
     catatanDataFuture = fetchDataUrls();
+
   }
 
   @override
@@ -99,7 +102,17 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Konfirmasi Hapus'),
+          titleTextStyle: TextStyle(
+            fontFamily: 'Nunito',
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            fontSize: 16
+          ),
           content: Text('Apakah Anda yakin ingin menghapus catatan ini?'),
+          contentTextStyle: TextStyle(
+            fontFamily: 'Nunito',
+            color: Colors.black
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -245,19 +258,14 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                         ],
                       ),
                       const SizedBox(height: 10),
-                      Visibility(
-                        visible: catatanData.images.isNotEmpty, // Hanya tampilkan jika terdapat gambar
-                        child: CustomPageIndicator(
-                          itemCount: catatanData.images.length,
+                      CustomPageIndicator(
+                          itemCount: catatanData.images.where((image) => image.imageUrl != null).length,
                           currentPage: currentPage,
                           pageController: _pageController,
-                          imageUrls: catatanData.images.map((image) => image.imageUrl).toList(),
-                        ),
-                        replacement: Container(
-                          color: Colors.grey[300], // Warna kotak abu-abu
-                          height: 10, // Sesuaikan dengan kebutuhan
-                          width: double.infinity, // Mengisi lebar maksimum
-                        ),
+                          imageUrls: catatanData.images
+                              .where((image) => image.imageUrl != null) // Filter yang memiliki imageUrl yang valid
+                              .map((image) => image.imageUrl!) // Ambil imageUrl yang valid dan ubah menjadi String non-nullable
+                              .toList(),
                       ),
                       const SizedBox(height: 10),
                       Text(
@@ -293,9 +301,18 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                                   splashColor: Colors.white.withOpacity(0.3),
                                   borderRadius: BorderRadius.circular(8),
                                   onTap: () {
-                                    // Handle edit button click
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => EditCatatanPage(
+                                        id: widget.id,
+                                        title: catatanData.title,
+                                        description: catatanData.description,
+                                        images: catatanData.images,
+                                        tags: catatanData.tag,
+                                      )),
+                                    );
                                   },
-                                  child: SizedBox(
+                                  child: const SizedBox(
                                     height: 40,
                                     width: 100, // Adjust the height and width as needed
                                     child: Row(
@@ -303,7 +320,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align to start and end
                                       children: [
                                         Padding(
-                                          padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
+                                          padding: EdgeInsets.fromLTRB(12, 0, 8, 0),
                                           child: Icon(
                                             Icons.edit,
                                             size: 18,
@@ -320,7 +337,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                                           ),
                                         ),
                                         Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                          padding: EdgeInsets.symmetric(horizontal: 8.0),
                                         ),
                                       ],
                                     ),
@@ -351,7 +368,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                                     _deleteCatatan();
                                     // Handle edit button click
                                   },
-                                  child: SizedBox(
+                                  child: const SizedBox(
                                     height: 40,
                                     width: 120, // Adjust the height and width as needed
                                     child: Row(
@@ -359,7 +376,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align to start and end
                                       children: [
                                         Padding(
-                                          padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
+                                          padding: EdgeInsets.fromLTRB(12, 0, 8, 0),
                                           child: Icon(
                                             Icons.archive,
                                             size: 18,
@@ -376,7 +393,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                                           ),
                                         ),
                                         Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                          padding: EdgeInsets.symmetric(horizontal: 8.0),
                                         ),
                                       ],
                                     ),
@@ -390,7 +407,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                       ),
                       const SizedBox(height: 10),
                       Visibility(
-                        visible: catatanData.summary != null && catatanData.summary.isNotEmpty,
+                        visible: catatanData.summary.isNotEmpty,
                         child: CollapsibleDescription(summary: catatanData.summary ?? ''),
                       ),
                       const SizedBox(height: 10),
@@ -398,7 +415,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                       const SizedBox(height: 10),
                       Text(
                         catatanData.description,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           fontFamily: 'Nunito',
                           color: Color(0xFFA1A1A1),
@@ -422,51 +439,54 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       context,
       MaterialPageRoute(
         builder: (context) => FullScreenImageView(
-          imageUrlsFuture: catatanDataFuture.then((data) => data.images.map((image) => image.imageUrl).toList()),
+          imageUrlsFuture: catatanDataFuture.then((data) => data.images
+              .where((image) => image.imageUrl != null) // Filter yang memiliki imageUrl yang valid
+              .map((image) => image.imageUrl!) // Ambil imageUrl yang valid dan ubah menjadi String non-nullable
+              .toList()),
           initialIndex: index,
         ),
       ),
     );
   }
 
-  Widget buildImageWithFallback(String imageUrl, String imagePreview, int itemCount) {
-    print('Building image: $imageUrl');
+
+  Widget buildImageWithFallback(String? imageUrl, String? imagePreview, int itemCount) {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isSingleItem = itemCount == 1;
+    print('imageurl: $imageUrl');
 
-    // Cek apakah imageUrl dan imagePreview null
-    if (imageUrl == null && imagePreview == null) {
+    if (imageUrl != null && imageUrl.isNotEmpty && imagePreview != null && imagePreview.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        placeholder: (context, url) {
+          return Image.memory(
+            base64Decode(imagePreview),
+            fit: BoxFit.fitHeight,
+            width: isSingleItem ? screenWidth : null,
+            height: isSingleItem ? screenWidth / 1.41 : null,
+          );
+        },
+        errorWidget: (context, url, error) {
+          print('Error loading image from $url: $error');
+          print('Error loading image, falling back to placeholder');
+          return Container(
+            color: Colors.grey[300],
+            width: isSingleItem ? screenWidth : null,
+            height: isSingleItem ? screenWidth / 1.41 : null,
+          );
+        },
+        fit: BoxFit.fitHeight,
+        width: isSingleItem ? screenWidth : null,
+      );
+    } else {
+      print('Invalid image URL or preview, falling back to placeholder');
       return Container(
-        color: Colors.grey[300], // Warna kotak abu-abu
+        color: Colors.grey[300],
         width: isSingleItem ? screenWidth : null,
         height: isSingleItem ? screenWidth / 1.41 : null,
       );
     }
-
-    return CachedNetworkImage(
-      imageUrl: imageUrl ?? imagePreview, // Gunakan imagePreview sebagai fallback jika imageUrl null
-      placeholder: (context, url) {
-        // Placeholder logic (optional)
-        return Container(
-          color: Colors.grey[300], // Warna kotak abu-abu
-          width: isSingleItem ? screenWidth : null,
-          height: isSingleItem ? screenWidth / 1.41 : null,
-        );
-      },
-      errorWidget: (context, url, error) {
-        // Fallback logic (optional)
-        print('Error loading image, falling back to placeholder');
-        return Container(
-          color: Colors.grey[300], // Warna kotak abu-abu
-          width: isSingleItem ? screenWidth : null,
-          height: isSingleItem ? screenWidth / 1.41 : null,
-        );
-      },
-      fit: BoxFit.fitHeight,
-      width: isSingleItem ? screenWidth : null,
-    );
   }
-
 }
 
 class CatatanData {
@@ -509,13 +529,13 @@ class Owner {
 }
 
 class ImageData {
-  late String imageUrl;
-  late String imagePreview;
+  late String? imageUrl;
+  late String? imagePreview;
 
   ImageData({required this.imageUrl, required this.imagePreview});
 
   ImageData.fromJson(Map<String, dynamic> json) {
-    imageUrl = json['image_url'] ?? '';
-    imagePreview = json['image_preview'] ?? '';
+    imageUrl = json['image_url'];
+    imagePreview = json['image_preview'];
   }
 }

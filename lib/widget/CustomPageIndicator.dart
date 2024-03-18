@@ -5,13 +5,13 @@ class CustomPageIndicator extends StatefulWidget {
   final int itemCount;
   final int currentPage;
   final PageController pageController;
-  final List<String> imageUrls; // Pass imageUrls as a parameter
+  final List<String>? imageUrls; // Pass imageUrls as a parameter
 
   CustomPageIndicator({
     required this.itemCount,
     required this.currentPage,
     required this.pageController,
-    required this.imageUrls,
+    this.imageUrls,
   });
 
   @override
@@ -45,19 +45,19 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
       child: Center(
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
-          child: ListView.builder(
+          child: widget.imageUrls != null && widget.imageUrls!.isNotEmpty
+              ? ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: widget.itemCount,
             itemBuilder: (context, index) {
+              String? imageUrl = widget.imageUrls![index];
               bool isCurrentPage = index == widget.currentPage;
-              String? imageUrl = widget.imageUrls[index];
+              print(imageUrl);
 
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: padding),
                 child: GestureDetector(
                   onTap: () {
-                    // If clicking the last image indicator, move to the last page without animation
-                    // If clicking other indicators, animate as usual
                     widget.pageController.animateToPage(
                       index,
                       duration: const Duration(milliseconds: 300),
@@ -77,22 +77,21 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(5.0),
-                      child: imageUrl != null
-                          ? CachedNetworkImage(
-                        imageUrl: imageUrl,
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl!,
                         placeholder: (context, url) => _buildPlaceholder(),
                         errorWidget: (context, url, error) => _buildErrorWidget(),
-                        width: indicatorWidth - 4.0, // Adjust the width to avoid overlap
-                        height: 66.0, // Adjust the height to fit within the container
+                        width: indicatorWidth - 4.0,
+                        height: 66.0,
                         fit: BoxFit.cover,
-                      )
-                          : _buildPlaceholder(), // Jika imageUrl null, tampilkan placeholder
+                      ),
                     ),
                   ),
                 ),
               );
             },
-          ),
+          )
+              : _buildPlaceholder(),
         ),
       ),
     );
@@ -102,6 +101,8 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
     // You can customize this placeholder widget
     return Container(
       color: Colors.grey[300],
+      width: 50.0, // Sesuaikan dengan lebar indikator
+      height: 70.0,
     );
   }
 
@@ -109,7 +110,8 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
     // You can customize this error widget
     return Container(
       color: Colors.grey,
-
+      width: 50.0, // Sesuaikan dengan lebar indikator
+      height: 70.0,
     );
   }
 }
