@@ -197,7 +197,6 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
             );
           }
           print('Number of images: ${catatanData.images.length}');
-
           return LayoutBuilder(
             builder: (context, constraints) {
               int itemCount = max(1, catatanData.images.length);
@@ -276,6 +275,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+
                       Visibility(
                         visible: ownerShip == true, // Check if ownerShip is a boolean true
                         child: Row(

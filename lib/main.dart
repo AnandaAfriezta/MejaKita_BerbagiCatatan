@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'widget/CustomFloatButton.dart';
 import 'widget/header.dart';
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        resizeToAvoidBottomInset: false,
         body: CustomBody(),
         floatingActionButton: CustomFloatingActionButton(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -39,6 +41,8 @@ class _CustomBodyState extends State<CustomBody> {
   int itemsPerPage = 6;
   bool allDataLoaded = false;
   int availablePage = 1;
+  late TextEditingController _searchController;
+  late String keyword = '';
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
   GlobalKey<RefreshIndicatorState>();
@@ -46,12 +50,13 @@ class _CustomBodyState extends State<CustomBody> {
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController();
     fetchCatatanData();
   }
 
   Future<void> fetchCatatanData() async {
     final Uri apiUrl = Uri.parse(
-        'https://service-catatan.mejakita.com/catatan?itemPerPage=$itemsPerPage&page=$currentPage'
+        'https://service-catatan.mejakita.com/catatan?keyword=$keyword&itemPerPage=$itemsPerPage&page=$currentPage'
     );
     print("API URL: $apiUrl");
     final response = await http.get(apiUrl);
@@ -108,6 +113,18 @@ class _CustomBodyState extends State<CustomBody> {
     );
   }
 
+  void _searchCatatanData() {
+    setState(() {
+      keyword = _searchController.text;
+      isLoading = true;
+      currentPage = 1;
+      catatanList.clear();
+      allDataLoaded = false;
+    });
+    print('Keyword pencarian: $keyword');
+    fetchCatatanData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -132,25 +149,50 @@ class _CustomBodyState extends State<CustomBody> {
                       borderRadius: BorderRadius.circular(8),
                       color: Colors.grey[100],
                     ),
-                    child: const TextField(
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Cari catatan...',
-                        hintStyle: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontSize: 16.0,
-                          fontStyle: FontStyle.normal,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.grey,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Cari catatan...',
+                              hintStyle: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 16.0,
+                                fontStyle: FontStyle.normal,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.grey,
+                              ),
+                              icon: Icon(Icons.search),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                keyword = value;
+                              });
+                            },
+                          ),
                         ),
-                        icon: Icon(Icons.search),
-                      ),
+                        if (_searchController.text.isNotEmpty)
+                          IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                keyword = '';
+                              });
+                              _searchCatatanData();
+                            },
+                          ),
+                      ],
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    _searchCatatanData(); // Ensure _searchCatatanData() is called here
+                  },
                   child: Ink(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
@@ -167,9 +209,6 @@ class _CustomBodyState extends State<CustomBody> {
                     child: InkWell(
                       splashColor: Colors.white.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(8),
-                      onTap: () {
-                        // Tambahkan logika untuk tombol cari di sini
-                      },
                       child: const SizedBox(
                         height: 45,
                         width: 80,
