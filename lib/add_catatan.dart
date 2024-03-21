@@ -24,6 +24,10 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
   final TextEditingController _tagController = TextEditingController();
   final List<String> _tags = [];
 
+  String? _judulError;
+  String? _deskripsiError;
+  String? _tagError;
+
   Future<void> _selectImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
@@ -42,45 +46,64 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
   }
 
   void _moveImageLeft(int index) {
-    if (index > 1) {
+    if (index > 0) {
       setState(() {
-        File temp = _selectedImages[index - 1];
-        _selectedImages[index - 1] = _selectedImages[index - 2];
-        _selectedImages[index - 2] = temp;
+        File temp = _selectedImages[index];
+        _selectedImages[index] = _selectedImages[index - 1];
+        _selectedImages[index - 1] = temp;
       });
     }
   }
 
   void _moveImageRight(int index) {
-    if (index < _selectedImages.length) {
+    if (index < _selectedImages.length - 1) { // Ubah kondisi agar tidak melebihi batas indeks gambar
       setState(() {
-        File temp = _selectedImages[index - 1];
-        _selectedImages[index - 1] = _selectedImages[index];
-        _selectedImages[index] = temp;
+        File temp = _selectedImages[index];
+        _selectedImages[index] = _selectedImages[index + 1];
+        _selectedImages[index + 1] = temp;
       });
     }
   }
-
 
   void _addTag(String tag) {
-    final String tagText = _tagController.text.trim();
-    if (tagText.isNotEmpty) {
-      setState(() {
-        _tags.add(tagText);
-        _tagController.clear();
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tag tidak boleh kosong'),
-        ),
-      );
-    }
+    setState(() {
+      _tags.add(tag.trim()); // Tambahkan tag baru langsung ke dalam list _tags
+      _tagController.clear();
+    });
   }
 
+  void _uploadCatatan() async {
+    setState(() {
+      _judulError = null;
+      _deskripsiError = null;
+      _tagError = null;
+    });
 
+    if (_judulController.text.isEmpty) {
+      setState(() {
+        _judulError = 'Judul belum diisi';
+      });
+      return;
+    }
+    if (_deskripsiController.text.isEmpty) {
+      setState(() {
+        _deskripsiError = 'Deskripsi belum diisi';
+      });
+      return;
+    }
+    if (_judulController.text.length < 5) {
+      setState(() {
+        _judulError = 'Judul harus memiliki setidaknya 5 karakter';
+      });
+      return;
+    }
+    if (_deskripsiController.text.length < 5) {
+      setState(() {
+        _deskripsiError = 'Deskripsi harus memiliki setidaknya 5 karakter';
+      });
+      return;
+    }
 
-  Future<void> _uploadCatatan() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? loginData = prefs.getString('userData');
 
@@ -110,17 +133,10 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
       request.fields['title'] = _judulController.text;
       request.fields['description'] = _deskripsiController.text;
 
-      // Split string input berdasarkan karakter newline ("\n")
-      List<String> tagList = _tagController.text.split('\n');
-
-      // Tambahkan setiap tag yang dipisahkan ke dalam list _tags
-      _tags.addAll(tagList);
-
-      // Gabungkan semua tag menjadi satu string dipisahkan oleh koma dan spasi
-      String combinedTags = _tags.join(', ');
-
-      // Tambahkan string tag yang digabungkan ke request
-      request.fields['tags[]'] = combinedTags;
+      // Pisahkan tag secara manual dan tambahkan ke dalam fields request
+      for (int i = 0; i < _tags.length; i++) {
+        request.fields['tags[$i]'] = _tags[i];
+      }
 
       request.headers.addAll({
         'Authorization': 'Bearer $token',
@@ -136,12 +152,17 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
           context,
           MaterialPageRoute(builder: (context) => const MyApp()),
         );
-      } else {
-        print('Failed to upload catatan');
-
-        // Print the error message from the server
+      }
+      else {
         final responseString = await response.stream.bytesToString();
         print('Error message: $responseString');
+
+        if (responseString.contains('"message":"Title is already defined"')) {
+          setState(() {
+            _judulError = 'Judul telah digunakan';
+          });
+          return;
+        }
       }
     }
   }
@@ -198,33 +219,140 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Gambar Catatan',
-                    style: TextStyle(
+              if (_judulError != null && _judulError!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0, top: 4.0),
+                  child: Text(
+                    _judulError!,
+                    style: const TextStyle(
                       fontFamily: 'Nunito',
                       fontSize: 14.0,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF9CA3AF),
+                      fontWeight: FontWeight.normal,
+                      color: Colors.red,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 227,
-                    child: ListView.builder(
+                ),
+              const SizedBox(height: 16),
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Gambar Catatan',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
-                      itemCount: _selectedImages.length + 1,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return GestureDetector(
+                      child: Row(
+                        children: [
+                          // Menampilkan gambar yang dipilih
+                          for (int index = 0; index < _selectedImages.length; index++)
+                            Stack(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                                  width: 150,
+                                  height: 227,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: const Color(0xFFF3F4F6),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.file(
+                                      _selectedImages[index],
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      fit: BoxFit.cover, // Menyesuaikan gambar dengan kontainer
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      if (index > 0)
+                                        Center(
+                                          child: Container(
+                                            margin: const EdgeInsets.only(bottom: 8, left: 16),
+                                            height: 30,
+                                            width: 30,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: FittedBox(
+                                              fit: BoxFit.contain,
+                                              child: IconButton(
+                                                icon: const Icon(Icons.arrow_back),
+                                                onPressed: () => _moveImageLeft(index),
+                                                iconSize: 30,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      Expanded(
+                                        child: Center(
+                                          child: Container(
+                                            margin: const EdgeInsets.only(bottom: 8),
+                                            height: 30,
+                                            width: 50,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFFF4343),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: FittedBox(
+                                              fit: BoxFit.contain,
+                                              child: IconButton(
+                                                icon: const Icon(Icons.delete, color: Colors.white),
+                                                onPressed: () => _deleteImage(index),
+                                                iconSize: 30,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      if (index < _selectedImages.length - 1)
+                                        Center(
+                                          child: Container(
+                                            margin: const EdgeInsets.only(bottom: 8, right: 16),
+                                            height: 30,
+                                            width: 30,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: FittedBox(
+                                              fit: BoxFit.contain,
+                                              child: IconButton(
+                                                icon: const Icon(Icons.arrow_forward),
+                                                onPressed: () => _moveImageRight(index),
+                                                iconSize: 30,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          // Menampilkan GestureDetector untuk menambah gambar baru
+                          GestureDetector(
                             onTap: _selectImage,
                             child: Container(
                               width: 150,
                               height: 227,
-                              margin: const EdgeInsets.only(right: 8),
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
                                 color: const Color(0xFFF3F4F6),
@@ -237,105 +365,12 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                                 ),
                               ),
                             ),
-                          );
-                        }
-                        return Stack(
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 8),
-                              width: 150,
-                              height: 227,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: const Color(0xFFF3F4F6),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  _selectedImages[index - 1],
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  if (index > 1)
-                                    Center(
-                                      child: Container(
-                                        margin: const EdgeInsets.only(bottom: 8, left: 16),
-                                        height: 30,
-                                        width: 30,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: FittedBox(
-                                          fit: BoxFit.contain,
-                                          child: IconButton(
-                                            icon: const Icon(Icons.arrow_back),
-                                            onPressed: () => _moveImageLeft(index),
-                                            iconSize: 30,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  Expanded(
-                                    child: Center(
-                                      child: Container(
-                                        margin: const EdgeInsets.only(bottom: 8),
-                                        height: 30,
-                                        width: 50,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFFF4343),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: FittedBox(
-                                          fit: BoxFit.contain,
-                                          child: IconButton(
-                                            icon: const Icon(Icons.delete, color: Colors.white),
-                                            onPressed: () => _deleteImage(index - 1),
-                                            iconSize: 30,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  if (index < _selectedImages.length)
-                                    Center(
-                                      child: Container(
-                                        margin: const EdgeInsets.only(bottom: 8, right: 16),
-                                        height: 30,
-                                        width: 30,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: FittedBox(
-                                          fit: BoxFit.contain,
-                                          child: IconButton(
-                                            icon: const Icon(Icons.arrow_forward),
-                                            onPressed: () => _moveImageRight(index),
-                                            iconSize: 30,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
               Column(
@@ -372,6 +407,19 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                   ),
                 ],
               ),
+              if (_deskripsiError != null && _deskripsiError!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0, top: 4.0),
+                  child: Text(
+                    _deskripsiError!,
+                    style: const TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
               const SizedBox(height: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,6 +499,19 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                   ),
                 ],
               ),
+              if (_tagError != null)
+                const Padding(
+                  padding: EdgeInsets.only(left: 16.0, top: 4.0),
+                  child: Text(
+                    'Tag Belum diisi',
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
               const SizedBox(height: 16),
             ],
           ),

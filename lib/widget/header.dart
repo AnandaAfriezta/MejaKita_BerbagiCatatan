@@ -64,28 +64,31 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     isLoggedIn
                         ? InkWell(
-                      onTap: () {
-                        _showProfileMenu(context);
-                      },
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundImage: NetworkImage(userData['data']['user']['photo_url']),
-                        backgroundColor: Colors.white,
-                      ),
-                    )
+                            onTap: () {
+                              _showProfileMenu(context);
+                            },
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundImage: NetworkImage(
+                                  userData['data']['user']['photo_url']),
+                              backgroundColor: Colors.white,
+                            ),
+                          )
                         : InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const LoginPage()),
-                        );
-                      },
-                      child: const CircleAvatar(
-                        radius: 20,
-                        backgroundImage: AssetImage('assets/images/guest.png'),
-                        backgroundColor: Colors.white,
-                      ),
-                    ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginPage()),
+                              );
+                            },
+                            child: const CircleAvatar(
+                              radius: 20,
+                              backgroundImage:
+                                  AssetImage('assets/images/guest.png'),
+                              backgroundColor: Colors.white,
+                            ),
+                          ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -97,7 +100,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
           return Text('Error: ${snapshot.error}');
         } else {
           // Jika data masih dimuat, tampilkan loading atau indikator lainnya
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
       },
     );
@@ -120,7 +123,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
     // Tambahkan logika untuk mereload halaman
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => MyApp()),
+      MaterialPageRoute(builder: (context) => const MyApp()),
     );
   }
 
@@ -134,12 +137,21 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ListTile(
-                title: Text('${userData['data']['user']['name']}'),
+                title: Text(
+                  '${userData['data']['user']['name']}',
+                  style: const TextStyle(
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               ListTile(
-                title: Text(
+                title: const Text(
                   'Logout',
-                  style: TextStyle(color: Colors.red), // Teks menjadi merah
+                  style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red),
                 ),
                 onTap: () {
                   _logout(context);

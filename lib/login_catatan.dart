@@ -20,6 +20,25 @@ class _LoginPageState extends State<LoginPage> {
   String? _passwordError;
 
   Future<void> _login() async {
+    setState(() {
+      _emailError = null;
+      _passwordError = null;
+    });
+
+    if (_emailController.text.isEmpty) {
+      setState(() {
+        _emailError = 'Email belum diisi';
+      });
+      return;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      setState(() {
+        _passwordError = 'Password belum diisi';
+      });
+      return;
+    }
+
     final url = Uri.parse('https://service2.mejakita.com/login/user');
     final String basicAuth = 'Basic ' +
         base64Encode(utf8
@@ -46,14 +65,36 @@ class _LoginPageState extends State<LoginPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Login Gagal'),
-            content: const Text('password yang Anda masukkan salah.'),
+            title: const Text(
+              'Login Gagal',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: const Text(
+              'password yang Anda masukkan salah.',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('OK'),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF31B057),
+                  ),
+                ),
               ),
             ],
           );
@@ -64,14 +105,36 @@ class _LoginPageState extends State<LoginPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Login Gagal'),
-            content: const Text('email yang Anda masukkan salah.'),
+            title: const Text(
+              'Login Gagal',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: const Text(
+              'email yang Anda masukkan belum terdaftar.',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('OK'),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF31B057),
+                  ),
+                ),
               ),
             ],
           );
@@ -82,14 +145,36 @@ class _LoginPageState extends State<LoginPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Login Gagal'),
-            content: const Text('Field belum diisi'),
+            title: const Text(
+              'Field kosong',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: const Text(
+              'Masih ada field yang masih kosong nih',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('OK'),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF31B057),
+                  ),
+                ),
               ),
             ],
           );
@@ -116,6 +201,7 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
               'Email',
@@ -138,23 +224,39 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: TextField(
+                      style: const TextStyle(
+                        fontFamily: 'Nunito',
+                        fontWeight: FontWeight.w600,
+                      ),
                       controller: _emailController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Masukkan email Anda',
-                        hintStyle: const TextStyle(
+                        hintStyle: TextStyle(
                           fontFamily: 'Nunito',
                           fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF9CA3AF),
                         ),
                         border: InputBorder.none,
-                        errorText: _emailError,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
+            if (_emailError != null)
+              const Padding(
+                padding: EdgeInsets.only(left: 16.0, top: 4.0),
+                child: Text(
+                  'Email Belum diisi',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
             const SizedBox(height: 16),
             const Text(
               'Password',
@@ -177,17 +279,20 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: TextField(
+                      style: const TextStyle(
+                        fontFamily: 'Nunito',
+                        fontWeight: FontWeight.w600,
+                      ),
                       controller: _passwordController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Masukkan password Anda',
-                        hintStyle: const TextStyle(
+                        hintStyle: TextStyle(
                           fontFamily: 'Nunito',
                           fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF9CA3AF),
                         ),
                         border: InputBorder.none,
-                        errorText: _passwordError,
                       ),
                       obscureText: true,
                     ),
@@ -195,6 +300,19 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
+            if (_passwordError != null)
+              const Padding(
+                padding: EdgeInsets.only(left: 16.0, top: 4.0),
+                child: Text(
+                  'Password belum diisi',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
