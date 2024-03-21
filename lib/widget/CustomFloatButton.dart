@@ -38,7 +38,6 @@ class CustomFloatingActionButton extends StatelessWidget {
             // Check if login data is available
             if (loginDataString != null) {
               loginData = json.decode(loginDataString);
-              print(loginDataString);
 
               Navigator.push(
                 context,
