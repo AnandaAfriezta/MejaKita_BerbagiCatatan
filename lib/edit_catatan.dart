@@ -30,6 +30,7 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
   late List<int> orders;
   late TextEditingController _tagController;
   List<String> _tags = [];
+  String? _deskripsiError;
 
   @override
   void initState() {
@@ -70,36 +71,26 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
   }
 
   void _updateCatatan(BuildContext context) async {
+    setState(() {
+      _deskripsiError = null;
+    });
+
+    String trimmedDescription = _descriptionController.text.trim();
+    if (trimmedDescription.isEmpty) {
+      setState(() {
+        _deskripsiError = 'Deskripsi belum diisi';
+      });
+      return;
+    }else if (trimmedDescription.length < 5){
+      setState(() {
+        _deskripsiError = 'Deskripsi harus memiliki setidaknya 5 karakter';
+      });
+      return;
+    }
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userData = prefs.getString('userData');
     String token = _getTokenFromUserData(userData!);
-
-    // Validasi field description
-    if (_descriptionController.text.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Peringatan'),
-            content: Text('Deskripsi catatan tidak boleh kosong.'),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('OK',
-                  style: TextStyle(
-                      fontFamily: 'Nunito',
-                      color: Colors.black
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Tutup dialog
-                },
-              ),
-            ],
-          );
-        },
-      );
-      return; // Hentikan eksekusi jika deskripsi kosong
-    }
 
     // URL endpoint untuk pembaruan catatan
     String apiUrl = 'https://service-catatan.mejakita.com/catatan/${widget.id}';
@@ -269,7 +260,7 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
                   },
                 ),
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
               const Text(
                 'Ubah Deskripsi Catatan',
                 style: TextStyle(
@@ -299,7 +290,20 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
                   ),
                 ),
               ),
-
+              if (_deskripsiError != null && _deskripsiError!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0, top: 4.0),
+                  child: Text(
+                    _deskripsiError!,
+                    style: const TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
