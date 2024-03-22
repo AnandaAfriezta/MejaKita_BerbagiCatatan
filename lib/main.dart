@@ -58,7 +58,7 @@ class _CustomBodyState extends State<CustomBody> {
     final Uri apiUrl = Uri.parse(
         'https://service-catatan.mejakita.com/catatan?keyword=$keyword&itemPerPage=$itemsPerPage&page=$currentPage'
     );
-    print("API URL: $apiUrl");
+
     final response = await http.get(apiUrl);
 
     if (response.statusCode == 200) {
@@ -121,7 +121,6 @@ class _CustomBodyState extends State<CustomBody> {
       catatanList.clear();
       allDataLoaded = false;
     });
-    print('Keyword pencarian: $keyword');
     fetchCatatanData();
   }
 
@@ -130,7 +129,7 @@ class _CustomBodyState extends State<CustomBody> {
     return RefreshIndicator(
       key: _refreshIndicatorKey,
       onRefresh: _handleRefresh,
-      color: Color(0xFF31B057),
+      color: const Color(0xFF31B057),
       child: Column(
         children: [
           const CustomHeader(isHomePage: true,),
@@ -154,7 +153,7 @@ class _CustomBodyState extends State<CustomBody> {
                         Expanded(
                           child: TextField(
                             controller: _searchController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               border: InputBorder.none,
                               hintText: 'Cari catatan...',
                               hintStyle: TextStyle(
@@ -175,7 +174,7 @@ class _CustomBodyState extends State<CustomBody> {
                         ),
                         if (_searchController.text.isNotEmpty)
                           IconButton(
-                            icon: Icon(Icons.clear),
+                            icon: const Icon(Icons.clear),
                             onPressed: () {
                               setState(() {
                                 _searchController.clear();
@@ -275,7 +274,7 @@ class _CustomBodyState extends State<CustomBody> {
                       itemCount: itemCount,
                       itemBuilder: (context, index) {
                         if (index == itemCount - 1 && !allDataLoaded) {
-                          return SizedBox(
+                          return const SizedBox(
                             height: 200, // Set the height as needed
                             child: Center(
                               child: CircularProgressIndicator(

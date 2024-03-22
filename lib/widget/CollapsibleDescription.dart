@@ -48,14 +48,14 @@ class _CollapsibleDescriptionState extends State<CollapsibleDescription> {
               ],
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             widget.summary, // Access shortDocs from the widget property
-            style: TextStyle(fontSize: 12),
+            style: const TextStyle(fontSize: 12),
             maxLines: isExpanded ? 10000 : 2,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
         ],
       ),
     );

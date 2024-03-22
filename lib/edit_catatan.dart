@@ -119,27 +119,23 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
 
     // Cek apakah request berhasil
     if (response.statusCode == 200) {
-      print('Catatan berhasil diperbarui!');
-     print(requestBody);
 
       // Pindah ke halaman MyApp
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MyApp()), // Sesuaikan dengan nama class MyApp Anda
+        MaterialPageRoute(builder: (context) => const MyApp()), // Sesuaikan dengan nama class MyApp Anda
       );
     } else {
-      print('Gagal memperbarui catatan. Status code: ${response.statusCode}');
-
       // Tampilkan popup
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Gagal Memperbarui Catatan'),
-            content: Text('Terjadi kesalahan saat memperbarui catatan. Silakan coba lagi.'),
+            title: const Text('Gagal Memperbarui Catatan'),
+            content: const Text('Terjadi kesalahan saat memperbarui catatan. Silakan coba lagi.'),
             actions: <Widget>[
               TextButton(
-                child: Text('OK',
+                child: const Text('OK',
                 style: TextStyle(
                   fontFamily: 'Nunito',
                   color: Colors.black
@@ -169,7 +165,7 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomHeader(isHomePage: false),
+      appBar: const CustomHeader(isHomePage: false),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -178,14 +174,14 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
             children: [
             Text(
             widget.title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24,
               fontFamily: 'Nunito',
               fontWeight: FontWeight.bold,
             ),
           ),
               const SizedBox(height: 20,),
-              Text(
+              const Text(
                 'Ubah Urutan Catatan',
                 style: TextStyle(
                   fontFamily: 'Nunito',
@@ -206,7 +202,7 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
                     return Stack(
                       children: [
                         Container(
-                          margin: EdgeInsets.symmetric(horizontal: 8),
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
                           width: 150,
                           height: 227,
                           decoration: BoxDecoration(
@@ -230,12 +226,12 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
                             child: IconButton(
                               onPressed: () => _moveImageLeft(index),
                               icon: Container(
-                                padding: EdgeInsets.all(6),
-                                decoration: BoxDecoration(
+                                padding: const EdgeInsets.all(6),
+                                decoration: const BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(Icons.arrow_back),
+                                child: const Icon(Icons.arrow_back),
                               ),
                             ),
                           ),
@@ -246,12 +242,12 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
                             child: IconButton(
                               onPressed: () => _moveImageRight(index),
                               icon: Container(
-                                padding: EdgeInsets.all(6),
-                                decoration: BoxDecoration(
+                                padding: const EdgeInsets.all(6),
+                                decoration: const BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(Icons.arrow_forward),
+                                child: const Icon(Icons.arrow_forward),
                               ),
                             ),
                           ),
