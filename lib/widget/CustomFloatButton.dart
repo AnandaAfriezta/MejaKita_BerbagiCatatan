@@ -50,16 +50,18 @@ class CustomFloatingActionButton extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => LoginPage(),
+                  builder: (context) => const LoginPage(),
                 ),
               );
             }
           },
-          child: const Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Icon(
-              Icons.add,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Image.asset(
+              'assets/images/floating_add_button.png',
               color: Colors.white,
+              width: 24,
+              height: 24,
             ),
           ),
         ),

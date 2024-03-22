@@ -47,6 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
               'Nama',
@@ -247,7 +248,7 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 8),
             GestureDetector(
               onTap: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
                 );

@@ -10,7 +10,8 @@ import 'package:path/path.dart' as path;
 import 'package:http_parser/http_parser.dart';
 
 class AddCatatanPage extends StatefulWidget {
-  const AddCatatanPage({Key? key, Map<String, dynamic>? loginData}) : super(key: key);
+  const AddCatatanPage({Key? key, Map<String, dynamic>? loginData})
+      : super(key: key);
 
   @override
   _AddCatatanPageState createState() => _AddCatatanPageState();
@@ -38,7 +39,6 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
     }
   }
 
-
   void _deleteImage(int index) {
     setState(() {
       _selectedImages.removeAt(index);
@@ -56,7 +56,8 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
   }
 
   void _moveImageRight(int index) {
-    if (index < _selectedImages.length - 1) { // Ubah kondisi agar tidak melebihi batas indeks gambar
+    if (index < _selectedImages.length - 1) {
+      // Ubah kondisi agar tidak melebihi batas indeks gambar
       setState(() {
         File temp = _selectedImages[index];
         _selectedImages[index] = _selectedImages[index + 1];
@@ -79,25 +80,26 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
       _tagError = null;
     });
 
-    if (_judulController.text.isEmpty) {
+    String trimmedTitle = _judulController.text.trim();
+    if (trimmedTitle.isEmpty) {
       setState(() {
         _judulError = 'Judul belum diisi';
       });
       return;
-    }
-    if (_deskripsiController.text.isEmpty) {
-      setState(() {
-        _deskripsiError = 'Deskripsi belum diisi';
-      });
-      return;
-    }
-    if (_judulController.text.length < 5) {
+    } else if (trimmedTitle.length < 5) {
       setState(() {
         _judulError = 'Judul harus memiliki setidaknya 5 karakter';
       });
       return;
     }
-    if (_deskripsiController.text.length < 5) {
+
+    String trimmedDescription = _deskripsiController.text.trim();
+    if (trimmedDescription.isEmpty) {
+      setState(() {
+        _deskripsiError = 'Deskripsi belum diisi';
+      });
+      return;
+    } else if (trimmedDescription.length < 5) {
       setState(() {
         _deskripsiError = 'Deskripsi harus memiliki setidaknya 5 karakter';
       });
@@ -125,7 +127,8 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
           stream,
           length,
           filename: fileName,
-          contentType: MediaType('image', 'jpg'), // Tipe konten ditambahkan di sini
+          contentType:
+              MediaType('image', 'jpg'), // Tipe konten ditambahkan di sini
         );
         request.files.add(multipartFile);
       }
@@ -152,8 +155,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
           context,
           MaterialPageRoute(builder: (context) => const MyApp()),
         );
-      }
-      else {
+      } else {
         final responseString = await response.stream.bytesToString();
         print('Error message: $responseString');
 
@@ -252,11 +254,14 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                       child: Row(
                         children: [
                           // Menampilkan gambar yang dipilih
-                          for (int index = 0; index < _selectedImages.length; index++)
+                          for (int index = 0;
+                              index < _selectedImages.length;
+                              index++)
                             Stack(
                               children: [
                                 Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 8),
                                   width: 150,
                                   height: 227,
                                   decoration: BoxDecoration(
@@ -269,7 +274,8 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                                       _selectedImages[index],
                                       width: double.infinity,
                                       height: double.infinity,
-                                      fit: BoxFit.cover, // Menyesuaikan gambar dengan kontainer
+                                      fit: BoxFit
+                                          .cover, // Menyesuaikan gambar dengan kontainer
                                     ),
                                   ),
                                 ),
@@ -278,23 +284,28 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                                   left: 0,
                                   right: 0,
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       if (index > 0)
                                         Center(
                                           child: Container(
-                                            margin: const EdgeInsets.only(bottom: 8, left: 16),
+                                            margin: const EdgeInsets.only(
+                                                bottom: 8, left: 16),
                                             height: 30,
                                             width: 30,
                                             decoration: BoxDecoration(
                                               color: Colors.white,
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
                                             child: FittedBox(
                                               fit: BoxFit.contain,
                                               child: IconButton(
-                                                icon: const Icon(Icons.arrow_back),
-                                                onPressed: () => _moveImageLeft(index),
+                                                icon: const Icon(
+                                                    Icons.arrow_back),
+                                                onPressed: () =>
+                                                    _moveImageLeft(index),
                                                 iconSize: 30,
                                               ),
                                             ),
@@ -303,18 +314,22 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                                       Expanded(
                                         child: Center(
                                           child: Container(
-                                            margin: const EdgeInsets.only(bottom: 8),
+                                            margin: const EdgeInsets.only(
+                                                bottom: 8),
                                             height: 30,
                                             width: 50,
                                             decoration: BoxDecoration(
                                               color: const Color(0xFFFF4343),
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
                                             child: FittedBox(
                                               fit: BoxFit.contain,
                                               child: IconButton(
-                                                icon: const Icon(Icons.delete, color: Colors.white),
-                                                onPressed: () => _deleteImage(index),
+                                                icon: const Icon(Icons.delete,
+                                                    color: Colors.white),
+                                                onPressed: () =>
+                                                    _deleteImage(index),
                                                 iconSize: 30,
                                               ),
                                             ),
@@ -324,18 +339,22 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                                       if (index < _selectedImages.length - 1)
                                         Center(
                                           child: Container(
-                                            margin: const EdgeInsets.only(bottom: 8, right: 16),
+                                            margin: const EdgeInsets.only(
+                                                bottom: 8, right: 16),
                                             height: 30,
                                             width: 30,
                                             decoration: BoxDecoration(
                                               color: Colors.white,
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
                                             child: FittedBox(
                                               fit: BoxFit.contain,
                                               child: IconButton(
-                                                icon: const Icon(Icons.arrow_forward),
-                                                onPressed: () => _moveImageRight(index),
+                                                icon: const Icon(
+                                                    Icons.arrow_forward),
+                                                onPressed: () =>
+                                                    _moveImageRight(index),
                                                 iconSize: 30,
                                               ),
                                             ),
@@ -439,8 +458,6 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                     decoration: InputDecoration(
                       prefixIcon: Image.asset(
                         'assets/images/tag.png',
-                        width: 17,
-                        height: 17,
                       ),
                       hintText: 'Ketikkan Tags (enter untuk submit)',
                       hintStyle: const TextStyle(
@@ -467,7 +484,8 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                     children: _tags.map((tag) {
                       return Container(
                         margin: const EdgeInsets.all(4),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: const Color(0xFF31B057),
                           borderRadius: BorderRadius.circular(16),
