@@ -66,7 +66,6 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
   Future<CatatanData> fetchDataUrls() async {
     final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/${widget.slug}');
     final headers = <String, String>{};
-    print(widget.id);
     // Tambahkan header Authorization jika userToken ada
     if (widget.userToken != null && widget.userToken!.isNotEmpty) {
       headers['Authorization'] = 'Bearer ${widget.userToken}';
@@ -88,7 +87,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
     if (widget.userToken == null || widget.userToken!.isEmpty) {
       // Token tidak tersedia, tampilkan pesan ke pengguna
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('User token is missing'),
           backgroundColor: Colors.red,
         ),
@@ -101,15 +100,15 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Konfirmasi Hapus'),
-          titleTextStyle: TextStyle(
+          title: const Text('Konfirmasi Hapus'),
+          titleTextStyle: const TextStyle(
             fontFamily: 'Nunito',
             fontWeight: FontWeight.bold,
             color: Colors.black,
             fontSize: 16
           ),
-          content: Text('Apakah Anda yakin ingin menghapus catatan ini?'),
-          contentTextStyle: TextStyle(
+          content: const Text('Apakah Anda yakin ingin menghapus catatan ini?'),
+          contentTextStyle: const TextStyle(
             fontFamily: 'Nunito',
             color: Colors.black
           ),
@@ -119,7 +118,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                 // Tombol "Batal"
                 Navigator.of(context).pop(false);
               },
-              child: Text(
+              child: const Text(
                 'Batal',
                 style: TextStyle(color: Colors.black), // Warna teks "Batal"
               ),
@@ -129,7 +128,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                 // Tombol "Hapus"
                 Navigator.of(context).pop(true);
               },
-              child: Text(
+              child: const Text(
                 'Hapus',
                 style: TextStyle(color: Colors.red), // Warna teks "Hapus"
               ),
@@ -155,14 +154,14 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MyApp(), // Gantilah dengan widget MyApp yang sesuai
+          builder: (context) => const MyApp(), // Gantilah dengan widget MyApp yang sesuai
         ),
       );
 
     } else {
       // Handle error, misalnya tampilkan snackbar dengan pesan error
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Failed to delete catatan'),
           backgroundColor: Colors.red,
         ),
@@ -177,7 +176,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Menampilkan widget loading ketika data masih diambil
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(
               color: Color(0xFF31B057),
             ),
@@ -192,11 +191,11 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
           final CatatanData? catatanData = snapshot.data as CatatanData?;
           if (catatanData == null) {
             // Jika catatanData null, tampilkan placeholder atau pesan kesalahan sesuai kebutuhan
-            return Center(
+            return const Center(
               child: Text('Data is null'),
             );
           }
-          print('Number of images: ${catatanData.images.length}');
+
           return LayoutBuilder(
             builder: (context, constraints) {
               int itemCount = max(1, catatanData.images.length);
@@ -208,7 +207,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
               }
 
               int visibleImages = min(catatanData.images.length, screenWidth > 640 ? 2 : 1);
-              print('ScreenWidth: $screenWidth, VisibleImages: $visibleImages');
+
               return SingleChildScrollView(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
@@ -453,7 +452,6 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
   Widget buildImageWithFallback(String? imageUrl, String? imagePreview, int itemCount) {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isSingleItem = itemCount == 1;
-    print('imageurl: $imageUrl');
 
     if (imageUrl != null && imageUrl.isNotEmpty && imagePreview != null && imagePreview.isNotEmpty) {
       return CachedNetworkImage(
@@ -467,8 +465,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
           );
         },
         errorWidget: (context, url, error) {
-          print('Error loading image from $url: $error');
-          print('Error loading image, falling back to placeholder');
+
           return Container(
             color: Colors.grey[300],
             width: isSingleItem ? screenWidth : null,
@@ -479,7 +476,6 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
         width: isSingleItem ? screenWidth : null,
       );
     } else {
-      print('Invalid image URL or preview, falling back to placeholder');
       return Container(
         color: Colors.grey[300],
         width: isSingleItem ? screenWidth : null,
