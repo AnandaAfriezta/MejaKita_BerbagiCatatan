@@ -74,21 +74,26 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                               backgroundColor: Colors.white,
                             ),
                           )
-                        : InkWell(
-                            onTap: () {
+                        : TextButton(
+                            onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => const LoginPage()),
                               );
                             },
-                            child: const CircleAvatar(
-                              radius: 20,
-                              backgroundImage:
-                                  AssetImage('assets/images/guest.png'),
-                              backgroundColor: Colors.white,
+                            child: const Text(
+                              'Login',
+                              style: (
+                              TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF31B057),
+                              )
+                              ),
                             ),
-                          ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
