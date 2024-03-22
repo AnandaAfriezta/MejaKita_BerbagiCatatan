@@ -186,6 +186,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text(
           'Login',
@@ -201,8 +202,45 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Image.asset(
+                    'assets/images/kitty_halo.png',
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Selamat datang',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF31B057),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'mejakitties',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF31B057),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             const Text(
               'Email',
               style: TextStyle(
