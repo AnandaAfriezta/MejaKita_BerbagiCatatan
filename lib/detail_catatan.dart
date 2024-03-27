@@ -11,7 +11,8 @@ import 'widget/CollapsibleDescription.dart';
 import 'widget/AccountInfoWidget.dart';
 import 'widget/Tag.dart';
 import 'widget/FullScreenImageView.dart';
-
+import 'catatanData.dart';
+import 'api_constants.dart';
 
 class DetailCatatanPage extends StatelessWidget {
   final String slug;
@@ -64,7 +65,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
 
   // Function to fetch data from the API
   Future<CatatanData> fetchDataUrls() async {
-    final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/${widget.slug}');
+    final Uri apiUrl = Uri.parse('${ApiConstants.serviceCatatan}catatan/${widget.slug}');
     final headers = <String, String>{};
     // Tambahkan header Authorization jika userToken ada
     if (widget.userToken != null && widget.userToken!.isNotEmpty) {
@@ -143,7 +144,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       return;
     }
 
-    final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/${widget.id}');
+    final Uri apiUrl = Uri.parse('${ApiConstants.serviceCatatan}catatan/${widget.id}');
     final headers = <String, String>{'Authorization': 'Bearer ${widget.userToken}'};
 
     final response = await http.delete(apiUrl, headers: headers);
@@ -485,53 +486,3 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
   }
 }
 
-class CatatanData {
-  late String title;
-  late String summary;
-  late String description;
-  late Owner owner;
-  late List<ImageData> images;
-  late List<String> tag;
-
-  CatatanData({
-    required this.title,
-    this.summary = '',
-    required this.description,
-    required this.owner,
-    required this.images,
-    required this.tag,
-  });
-
-  CatatanData.fromJson(Map<String, dynamic> json) {
-    title = json['title'] ?? ''; // Jika title null, berikan string kosong
-    summary = json['summary'] ?? ''; // Jika summary null, berikan string kosong
-    description = json['description'] ?? ''; // Jika description null, berikan string kosong
-    owner = Owner.fromJson(json['owner']);
-    images = (json['images'] as List<dynamic>? ?? []).map((item) => ImageData.fromJson(item)).toList();
-    tag = (json['tag'] as List<dynamic>? ?? []).map((tag) => tag.toString()).toList();
-  }
-}
-
-class Owner {
-  late String name;
-  late String photoUrl;
-
-  Owner({required this.name, required this.photoUrl});
-
-  Owner.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    photoUrl = json['photo_url'];
-  }
-}
-
-class ImageData {
-  late String? imageUrl;
-  late String? imagePreview;
-
-  ImageData({required this.imageUrl, required this.imagePreview});
-
-  ImageData.fromJson(Map<String, dynamic> json) {
-    imageUrl = json['image_url'];
-    imagePreview = json['image_preview'];
-  }
-}
