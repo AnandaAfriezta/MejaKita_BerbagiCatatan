@@ -16,6 +16,8 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  bool _passwordVisible = false;
+
   String? _emailError;
   String? _passwordError;
 
@@ -228,15 +230,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 8),
-                    Text(
-                      'mejakitties',
-                      style: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF31B057),
-                      ),
-                    ),
                   ],
                 ),
               ],
@@ -322,15 +315,28 @@ class _LoginPageState extends State<LoginPage> {
                         fontWeight: FontWeight.w600,
                       ),
                       controller: _passwordController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'Masukkan password Anda',
-                        hintStyle: TextStyle(
+                        hintStyle: const TextStyle(
                           fontFamily: 'Nunito',
                           fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF9CA3AF),
                         ),
                         border: InputBorder.none,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: const Color(0xFF9CA3AF),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _passwordVisible = !_passwordVisible;
+                            });
+                          },
+                        ),
                       ),
                       obscureText: true,
                     ),
@@ -361,7 +367,7 @@ class _LoginPageState extends State<LoginPage> {
                     'Lupa password?',
                     style: TextStyle(
                       fontFamily: 'Nunito',
-                      fontSize: 16.0,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF9CA3AF),
                     ),
