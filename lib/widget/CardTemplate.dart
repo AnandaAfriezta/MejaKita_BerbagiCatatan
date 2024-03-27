@@ -181,7 +181,7 @@ class CardTemplate extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Icon(Icons.access_time, size: 16, color: Color(0xFFA1A1A1)),
+                            const Icon(Icons.access_time, size: 16, color: Color(0xFFA1A1A1)),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
