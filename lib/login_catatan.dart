@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
+import 'api_constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -41,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final url = Uri.parse('https://service2.mejakita.com/login/user');
+    final url = Uri.parse('${ApiConstants.serviceMejakita}login/user');
     final String basicAuth = 'Basic ' +
         base64Encode(utf8
             .encode('${_emailController.text}:${_passwordController.text}'));

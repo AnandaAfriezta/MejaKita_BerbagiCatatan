@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'catatanData.dart';
 import 'main.dart';
+import 'api_constants.dart';
 
 class EditCatatanPage extends StatefulWidget {
   final String title;
@@ -93,7 +94,7 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
     String token = _getTokenFromUserData(userData!);
 
     // URL endpoint untuk pembaruan catatan
-    String apiUrl = 'https://service-catatan.mejakita.com/catatan/${widget.id}';
+    String apiUrl = '${ApiConstants.serviceCatatan}catatan/${widget.id}';
 
     // Konversi list of int (orders) menjadi string
     String ordersString = orders.map((order) => 'orders[]=$order').join('&');

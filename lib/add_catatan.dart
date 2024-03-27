@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:berbagi_catatan/widget/header.dart';
 import 'package:path/path.dart' as path;
 import 'package:http_parser/http_parser.dart';
+import 'api_constants.dart';
 
 class AddCatatanPage extends StatefulWidget {
   const AddCatatanPage({Key? key, Map<String, dynamic>? loginData})
@@ -113,7 +114,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
       final Map<String, dynamic> userData = jsonDecode(loginData);
       final String token = userData['data']['token'];
 
-      final url = Uri.parse('https://service-catatan.mejakita.com/catatan');
+      final url = Uri.parse('${ApiConstants.serviceCatatan}catatan');
       var request = http.MultipartRequest('POST', url);
 
       // Tambahkan gambar sebagai bagian dari request

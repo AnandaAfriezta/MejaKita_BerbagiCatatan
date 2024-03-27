@@ -1,6 +1,7 @@
 import 'package:berbagi_catatan/login_catatan.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'api_constants.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -62,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    final url = Uri.parse('https://service2.mejakita.com/register');
+    final url = Uri.parse('${ApiConstants.serviceMejakita}register');
     final Map<String, String> body = {
       'name': _nameController.text,
       'email': _emailController.text,

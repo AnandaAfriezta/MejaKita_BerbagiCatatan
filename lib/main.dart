@@ -5,6 +5,7 @@ import 'widget/header.dart';
 import 'widget/CardTemplate.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'api_constants.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,7 +57,7 @@ class _CustomBodyState extends State<CustomBody> {
 
   Future<void> fetchCatatanData() async {
     final Uri apiUrl = Uri.parse(
-        'https://service-catatan.mejakita.com/catatan?keyword=$keyword&itemPerPage=$itemsPerPage&page=$currentPage'
+        '${ApiConstants.serviceCatatan}catatan?keyword=$keyword&itemPerPage=$itemsPerPage&page=$currentPage'
     );
 
     final response = await http.get(apiUrl);

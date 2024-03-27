@@ -12,6 +12,7 @@ import 'widget/AccountInfoWidget.dart';
 import 'widget/Tag.dart';
 import 'widget/FullScreenImageView.dart';
 import 'catatanData.dart';
+import 'api_constants.dart';
 
 class DetailCatatanPage extends StatelessWidget {
   final String slug;
@@ -64,7 +65,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
 
   // Function to fetch data from the API
   Future<CatatanData> fetchDataUrls() async {
-    final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/${widget.slug}');
+    final Uri apiUrl = Uri.parse('${ApiConstants.serviceCatatan}catatan/${widget.slug}');
     final headers = <String, String>{};
     // Tambahkan header Authorization jika userToken ada
     if (widget.userToken != null && widget.userToken!.isNotEmpty) {
@@ -143,7 +144,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       return;
     }
 
-    final Uri apiUrl = Uri.parse('https://service-catatan.mejakita.com/catatan/${widget.id}');
+    final Uri apiUrl = Uri.parse('${ApiConstants.serviceCatatan}catatan/${widget.id}');
     final headers = <String, String>{'Authorization': 'Bearer ${widget.userToken}'};
 
     final response = await http.delete(apiUrl, headers: headers);
