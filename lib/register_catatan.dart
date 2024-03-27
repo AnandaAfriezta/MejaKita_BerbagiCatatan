@@ -101,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // Navigasi ke halaman login setelah berhasil mendaftar
+
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -218,6 +218,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: TextField(
+                      style: const TextStyle(
+                        fontFamily: 'Nunito',
+                        fontWeight: FontWeight.w600,
+                      ),
                       controller: _nameController,
                       decoration: const InputDecoration(
                         hintText: 'Masukkan nama Anda',
@@ -269,6 +273,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: TextField(
+                      style: const TextStyle(
+                        fontFamily: 'Nunito',
+                        fontWeight: FontWeight.w600,
+                      ),
                       controller: _emailController,
                       decoration: const InputDecoration(
                         hintText: 'Masukkan email Anda',
@@ -320,6 +328,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: TextField(
+                      style: const TextStyle(
+                        fontFamily: 'Nunito',
+                        fontWeight: FontWeight.w600,
+                      ),
                       controller: _passwordController,
                       decoration: InputDecoration(
                         hintText: 'Masukkan password Anda',
@@ -385,6 +397,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: TextField(
+                      style: const TextStyle(
+                        fontFamily: 'Nunito',
+                        fontWeight: FontWeight.w600,
+                      ),
                       controller: _confirmPasswordController,
                       decoration: InputDecoration(
                         hintText: 'Ketikkan ulang password',

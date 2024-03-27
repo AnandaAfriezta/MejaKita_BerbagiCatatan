@@ -338,7 +338,7 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
                       ),
-                      obscureText: true,
+                      obscureText: !_passwordVisible,
                     ),
                   ),
                 ],
