@@ -21,7 +21,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
           bool isLoggedIn = userData.isNotEmpty;
 
           return Container(
-            padding: const EdgeInsets.fromLTRB(15, 40, 15, 0),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
               children: [
                 Row(
@@ -96,7 +96,6 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
               ],
             ),
           );
@@ -170,5 +169,5 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(80);
+  Size get preferredSize => const Size.fromHeight(70);
 }
