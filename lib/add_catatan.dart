@@ -117,7 +117,6 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
       final url = Uri.parse('${ApiConstants.serviceCatatan}catatan');
       var request = http.MultipartRequest('POST', url);
 
-      // Tambahkan gambar sebagai bagian dari request
       for (var imageFile in _selectedImages) {
         String fileName = path.basename(imageFile.path);
         var stream = http.ByteStream(imageFile.openRead());
@@ -128,8 +127,7 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
           stream,
           length,
           filename: fileName,
-          contentType:
-              MediaType('image', 'jpg'), // Tipe konten ditambahkan di sini
+          contentType: MediaType('image', 'jpg'),
         );
         request.files.add(multipartFile);
       }
@@ -174,74 +172,18 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomHeader(isHomePage: false),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Judul Catatan',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF9CA3AF),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: const Color(0xFFF3F4F6),
-                    ),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 16.0),
-                        Expanded(
-                          child: TextField(
-                            controller: _judulController,
-                            decoration: const InputDecoration(
-                              hintText: 'Judul Catatan',
-                              hintStyle: TextStyle(
-                                fontFamily: 'Nunito',
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF9CA3AF),
-                              ),
-                              border: InputBorder.none,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              if (_judulError != null && _judulError!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0, top: 4.0),
-                  child: Text(
-                    _judulError!,
-                    style: const TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 16),
-              SingleChildScrollView(
-                child: Column(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Gambar Catatan',
+                      'Judul Catatan',
                       style: TextStyle(
                         fontFamily: 'Nunito',
                         fontSize: 14.0,
@@ -250,139 +192,27 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
+                    Container(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: const Color(0xFFF3F4F6),
+                      ),
                       child: Row(
                         children: [
-                          // Menampilkan gambar yang dipilih
-                          for (int index = 0;
-                              index < _selectedImages.length;
-                              index++)
-                            Stack(
-                              children: [
-                                Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  width: 150,
-                                  height: 227,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    color: const Color(0xFFF3F4F6),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.file(
-                                      _selectedImages[index],
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      fit: BoxFit
-                                          .cover, // Menyesuaikan gambar dengan kontainer
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 0,
-                                  left: 0,
-                                  right: 0,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      if (index > 0)
-                                        Center(
-                                          child: Container(
-                                            margin: const EdgeInsets.only(
-                                                bottom: 8, left: 16),
-                                            height: 30,
-                                            width: 30,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: FittedBox(
-                                              fit: BoxFit.contain,
-                                              child: IconButton(
-                                                icon: const Icon(
-                                                    Icons.arrow_back),
-                                                onPressed: () =>
-                                                    _moveImageLeft(index),
-                                                iconSize: 30,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      Expanded(
-                                        child: Center(
-                                          child: Container(
-                                            margin: const EdgeInsets.only(
-                                                bottom: 8),
-                                            height: 30,
-                                            width: 50,
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFFF4343),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: FittedBox(
-                                              fit: BoxFit.contain,
-                                              child: IconButton(
-                                                icon: const Icon(Icons.delete,
-                                                    color: Colors.white),
-                                                onPressed: () =>
-                                                    _deleteImage(index),
-                                                iconSize: 30,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      if (index < _selectedImages.length - 1)
-                                        Center(
-                                          child: Container(
-                                            margin: const EdgeInsets.only(
-                                                bottom: 8, right: 16),
-                                            height: 30,
-                                            width: 30,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: FittedBox(
-                                              fit: BoxFit.contain,
-                                              child: IconButton(
-                                                icon: const Icon(
-                                                    Icons.arrow_forward),
-                                                onPressed: () =>
-                                                    _moveImageRight(index),
-                                                iconSize: 30,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          // Menampilkan GestureDetector untuk menambah gambar baru
-                          GestureDetector(
-                            onTap: _selectImage,
-                            child: Container(
-                              width: 150,
-                              height: 227,
-                              margin: const EdgeInsets.symmetric(horizontal: 8),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: const Color(0xFFF3F4F6),
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.add,
-                                  size: 40,
+                          const SizedBox(width: 16.0),
+                          Expanded(
+                            child: TextField(
+                              controller: _judulController,
+                              decoration: const InputDecoration(
+                                hintText: 'Judul Catatan',
+                                hintStyle: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w600,
                                   color: Color(0xFF9CA3AF),
                                 ),
+                                border: InputBorder.none,
                               ),
                             ),
                           ),
@@ -391,148 +221,322 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Deskripsi Catatan',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF9CA3AF),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _deskripsiController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: 'Jelaskan isi catatan yang kamu berikan...',
-                      hintStyle: const TextStyle(
+                if (_judulError != null && _judulError!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16.0, top: 4.0),
+                    child: Text(
+                      _judulError!,
+                      style: const TextStyle(
                         fontFamily: 'Nunito',
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF9CA3AF),
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF3F4F6),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.red,
                       ),
                     ),
                   ),
-                ],
-              ),
-              if (_deskripsiError != null && _deskripsiError!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0, top: 4.0),
-                  child: Text(
-                    _deskripsiError!,
-                    style: const TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Tags',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF9CA3AF),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _tagController,
-                    decoration: InputDecoration(
-                      prefixIcon: Image.asset(
-                        'assets/images/tag.png',
-                      ),
-                      hintText: 'Ketikkan Tags (enter untuk submit)',
-                      hintStyle: const TextStyle(
-                        fontFamily: 'Nunito',
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF9CA3AF),
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF3F4F6),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    onSubmitted: (tag) {
-                      if (tag.isNotEmpty) {
-                        _addTag(tag);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    children: _tags.map((tag) {
-                      return Container(
-                        margin: const EdgeInsets.all(4),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF31B057),
-                          borderRadius: BorderRadius.circular(16),
+                const SizedBox(height: 16),
+                SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Gambar Catatan',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF9CA3AF),
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              tag,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            const SizedBox(width: 4),
+                            // Menampilkan gambar yang dipilih
+                            for (int index = 0;
+                                index < _selectedImages.length;
+                                index++)
+                              Stack(
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    width: 150,
+                                    height: 227,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      color: const Color(0xFFF3F4F6),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.file(
+                                        _selectedImages[index],
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        fit: BoxFit
+                                            .cover, // Menyesuaikan gambar dengan kontainer
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        if (index > 0)
+                                          Center(
+                                            child: Container(
+                                              margin: const EdgeInsets.only(
+                                                  bottom: 8, left: 16),
+                                              height: 30,
+                                              width: 30,
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: FittedBox(
+                                                fit: BoxFit.contain,
+                                                child: IconButton(
+                                                  icon: const Icon(
+                                                      Icons.arrow_back),
+                                                  onPressed: () =>
+                                                      _moveImageLeft(index),
+                                                  iconSize: 30,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        Expanded(
+                                          child: Center(
+                                            child: Container(
+                                              margin: const EdgeInsets.only(
+                                                  bottom: 8),
+                                              height: 30,
+                                              width: 50,
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFFF4343),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: FittedBox(
+                                                fit: BoxFit.contain,
+                                                child: IconButton(
+                                                  icon: const Icon(Icons.delete,
+                                                      color: Colors.white),
+                                                  onPressed: () =>
+                                                      _deleteImage(index),
+                                                  iconSize: 30,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        if (index < _selectedImages.length - 1)
+                                          Center(
+                                            child: Container(
+                                              margin: const EdgeInsets.only(
+                                                  bottom: 8, right: 16),
+                                              height: 30,
+                                              width: 30,
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: FittedBox(
+                                                fit: BoxFit.contain,
+                                                child: IconButton(
+                                                  icon: const Icon(
+                                                      Icons.arrow_forward),
+                                                  onPressed: () =>
+                                                      _moveImageRight(index),
+                                                  iconSize: 30,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            // Menampilkan GestureDetector untuk menambah gambar baru
                             GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _tags.remove(tag);
-                                });
-                              },
-                              child: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 16,
+                              onTap: _selectImage,
+                              child: Container(
+                                width: 150,
+                                height: 227,
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: const Color(0xFFF3F4F6),
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 40,
+                                    color: Color(0xFF9CA3AF),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-              if (_tagError != null)
-                const Padding(
-                  padding: EdgeInsets.only(left: 16.0, top: 4.0),
-                  child: Text(
-                    'Tag Belum diisi',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.red,
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              const SizedBox(height: 16),
-            ],
+                const SizedBox(height: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Deskripsi Catatan',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _deskripsiController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'Jelaskan isi catatan yang kamu berikan...',
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF3F4F6),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_deskripsiError != null && _deskripsiError!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16.0, top: 4.0),
+                    child: Text(
+                      _deskripsiError!,
+                      style: const TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Tags',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _tagController,
+                      decoration: InputDecoration(
+                        prefixIcon: Image.asset(
+                          'assets/images/tag.png',
+                        ),
+                        hintText: 'Ketikkan Tags (enter untuk submit)',
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF3F4F6),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onSubmitted: (tag) {
+                        if (tag.isNotEmpty) {
+                          _addTag(tag);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      children: _tags.map((tag) {
+                        return Container(
+                          margin: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF31B057),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                tag,
+                                style: const TextStyle(
+                                  fontFamily: 'Nunito',
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _tags.remove(tag);
+                                  });
+                                },
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+                if (_tagError != null)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0, top: 4.0),
+                    child: Text(
+                      'Tag Belum diisi',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
