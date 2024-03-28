@@ -165,7 +165,8 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
       appBar: const CustomHeader(isHomePage: false),
       body: SingleChildScrollView(
         child: Padding(
@@ -470,6 +471,7 @@ class _EditCatatanPageState extends State<EditCatatanPage> {
           ],
         ),
       ),
+      )
     );
   }
 

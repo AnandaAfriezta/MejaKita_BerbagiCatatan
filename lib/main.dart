@@ -127,175 +127,180 @@ class _CustomBodyState extends State<CustomBody> {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      key: _refreshIndicatorKey,
-      onRefresh: _handleRefresh,
-      color: const Color(0xFF31B057),
-      child: Column(
-        children: [
-          const CustomHeader(isHomePage: true,),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    constraints: const BoxConstraints(
-                      minHeight: 40,
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.grey[100],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Cari catatan...',
-                              hintStyle: TextStyle(
-                                fontFamily: 'Nunito',
-                                fontSize: 16.0,
-                                fontStyle: FontStyle.normal,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.grey,
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: SafeArea(
+        child: RefreshIndicator(
+          key: _refreshIndicatorKey,
+          onRefresh: _handleRefresh,
+          color: const Color(0xFF31B057),
+          child: Column(
+            children: [
+              const CustomHeader(isHomePage: true,),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        constraints: const BoxConstraints(
+                          minHeight: 40,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.grey[100],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _searchController,
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'Cari catatan...',
+                                  hintStyle: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 16.0,
+                                    fontStyle: FontStyle.normal,
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.grey,
+                                  ),
+                                  icon: Icon(Icons.search),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    keyword = value;
+                                  });
+                                },
                               ),
-                              icon: Icon(Icons.search),
                             ),
-                            onChanged: (value) {
-                              setState(() {
-                                keyword = value;
-                              });
-                            },
-                          ),
-                        ),
-                        if (_searchController.text.isNotEmpty)
-                          IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              setState(() {
-                                _searchController.clear();
-                                keyword = '';
-                              });
-                              _searchCatatanData();
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                InkWell(
-                  onTap: () {
-                    _searchCatatanData(); // Ensure _searchCatatanData() is called here
-                  },
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: const Color(0xFF31B057),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0xFF237D3E),
-                          offset: Offset(0, 4),
-                          blurRadius: 0,
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      splashColor: Colors.white.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(8),
-                      child: const SizedBox(
-                        height: 45,
-                        width: 80,
-                        child: Center(
-                          child: Text(
-                            'Cari',
-                            style: TextStyle(
-                              fontFamily: 'Nunito',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
-                              color: Colors.white,
-                            ),
-                          ),
+                            if (_searchController.text.isNotEmpty)
+                              IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  setState(() {
+                                    _searchController.clear();
+                                    keyword = '';
+                                  });
+                                  _searchCatatanData();
+                                },
+                              ),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: isLoading
-                ? const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF31B057),
-              ),
-            )
-                : LayoutBuilder(
-              builder: (context, constraints) {
-                final isMobile = constraints.maxWidth < 640;
-                int itemCount = isMobile
-                    ? currentPage * itemsPerPage
-                    : catatanList.length;
-
-                return NotificationListener<ScrollNotification>(
-                    onNotification: _onScrollNotification,
-                    child: isMobile
-                        ? ListView.builder(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: itemCount + (allDataLoaded ? 0 : 1),
-                      itemBuilder: (context, index) {
-                        if (index == catatanList.length &&
-                            !allDataLoaded) {
-                          return _buildLoadingIndicator();
-                        }
-                        return index < catatanList.length
-                            ? CardTemplate(
-                          catatanData: catatanList[index],
-                        )
-                            : null;
+                    const SizedBox(width: 10),
+                    InkWell(
+                      onTap: () {
+                        _searchCatatanData(); // Ensure _searchCatatanData() is called here
                       },
-                    )
-                        : GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16.0,
-                        mainAxisSpacing: 16.0,
-                        childAspectRatio: 2.2,
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: itemCount,
-                      itemBuilder: (context, index) {
-                        if (index == itemCount - 1 && !allDataLoaded) {
-                          return const SizedBox(
-                            height: 200, // Set the height as needed
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: const Color(0xFF31B057),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0xFF237D3E),
+                              offset: Offset(0, 4),
+                              blurRadius: 0,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: InkWell(
+                          splashColor: Colors.white.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(8),
+                          child: const SizedBox(
+                            height: 45,
+                            width: 80,
                             child: Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF31B057),
+                              child: Text(
+                                'Cari',
+                                style: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                          );
-                        }
-                        return index < catatanList.length
-                            ? CardTemplate(
-                          catatanData: catatanList[index],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: isLoading
+                    ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF31B057),
+                  ),
+                )
+                    : LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 640;
+                    int itemCount = isMobile
+                        ? currentPage * itemsPerPage
+                        : catatanList.length;
+
+                    return NotificationListener<ScrollNotification>(
+                        onNotification: _onScrollNotification,
+                        child: isMobile
+                            ? ListView.builder(
+                          padding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: itemCount + (allDataLoaded ? 0 : 1),
+                          itemBuilder: (context, index) {
+                            if (index == catatanList.length &&
+                                !allDataLoaded) {
+                              return _buildLoadingIndicator();
+                            }
+                            return index < catatanList.length
+                                ? CardTemplate(
+                              catatanData: catatanList[index],
+                            )
+                                : null;
+                          },
                         )
-                            : null;
-                      },
-                    )
-                );
-              },
-            ),
+                            : GridView.builder(
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16.0,
+                            mainAxisSpacing: 16.0,
+                            childAspectRatio: 2.2,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: itemCount,
+                          itemBuilder: (context, index) {
+                            if (index == itemCount - 1 && !allDataLoaded) {
+                              return const SizedBox(
+                                height: 200, // Set the height as needed
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF31B057),
+                                  ),
+                                ),
+                              );
+                            }
+                            return index < catatanList.length
+                                ? CardTemplate(
+                              catatanData: catatanList[index],
+                            )
+                                : null;
+                          },
+                        )
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

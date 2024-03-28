@@ -23,11 +23,14 @@ class DetailCatatanPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomHeader(isHomePage: false),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: DetailCatatanWidget(slug: slug, userToken: userToken,id: id),
+    return SafeArea(
+      child: Scaffold(
+        appBar: const CustomHeader(isHomePage: false),
+        body: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: DetailCatatanWidget(slug: slug, userToken: userToken, id: id),
+        ),
+
       ),
     );
   }
@@ -103,15 +106,17 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
         return AlertDialog(
           title: const Text('Konfirmasi Hapus'),
           titleTextStyle: const TextStyle(
-            fontFamily: 'Nunito',
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-            fontSize: 16
+              fontFamily: 'Nunito',
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              fontSize: 20
           ),
           content: const Text('Apakah Anda yakin ingin menghapus catatan ini?'),
           contentTextStyle: const TextStyle(
-            fontFamily: 'Nunito',
-            color: Colors.black
+              fontFamily: 'Nunito',
+              fontWeight: FontWeight.w400,
+              color: Colors.black,
+              fontSize: 14
           ),
           actions: [
             TextButton(
@@ -121,7 +126,11 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
               },
               child: const Text(
                 'Batal',
-                style: TextStyle(color: Colors.black), // Warna teks "Batal"
+                style: TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16), // Warna teks "Batal"
               ),
             ),
             TextButton(
@@ -131,7 +140,11 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
               },
               child: const Text(
                 'Hapus',
-                style: TextStyle(color: Colors.red), // Warna teks "Hapus"
+                style: TextStyle(
+                    color: Colors.red,
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16), // Warna teks "Hapus"
               ),
             ),
           ],
@@ -163,7 +176,12 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
       // Handle error, misalnya tampilkan snackbar dengan pesan error
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to delete catatan'),
+          content: Text('Failed to delete catatan',
+              style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Nunito',
+              fontWeight: FontWeight.bold,
+              fontSize: 16),),
           backgroundColor: Colors.red,
         ),
       );
@@ -258,13 +276,13 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                       ),
                       const SizedBox(height: 10),
                       CustomPageIndicator(
-                          itemCount: catatanData.images.where((image) => image.imageUrl != null).length,
-                          currentPage: currentPage,
-                          pageController: _pageController,
-                          imageUrls: catatanData.images
-                              .where((image) => image.imageUrl != null) // Filter yang memiliki imageUrl yang valid
-                              .map((image) => image.imageUrl!) // Ambil imageUrl yang valid dan ubah menjadi String non-nullable
-                              .toList(),
+                        itemCount: catatanData.images.where((image) => image.imageUrl != null).length,
+                        currentPage: currentPage,
+                        pageController: _pageController,
+                        imageUrls: catatanData.images
+                            .where((image) => image.imageUrl != null) // Filter yang memiliki imageUrl yang valid
+                            .map((image) => image.imageUrl!) // Ambil imageUrl yang valid dan ubah menjadi String non-nullable
+                            .toList(),
                       ),
                       const SizedBox(height: 10),
                       Text(
@@ -401,7 +419,7 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
                                 ),
                               ),
                             ),
-                          const SizedBox(height: 10)
+                            const SizedBox(height: 10)
                           ],
                         ),
                       ),
@@ -485,4 +503,3 @@ class _DetailCatatanWidgetState extends State<DetailCatatanWidget> {
     }
   }
 }
-
