@@ -52,8 +52,6 @@ class _CustomPageIndicatorState extends State<CustomPageIndicator> {
             itemBuilder: (context, index) {
               String? imageUrl = widget.imageUrls![index];
               bool isCurrentPage = index == widget.currentPage;
-              print(imageUrl);
-
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: padding),
                 child: GestureDetector(

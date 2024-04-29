@@ -75,8 +75,6 @@ class CardTemplate extends StatelessWidget {
                     ),
                   );
                 } catch (e) {
-                  print('Error decoding user data: $e');
-
                   Navigator.push(
                     context,
                     MaterialPageRoute(

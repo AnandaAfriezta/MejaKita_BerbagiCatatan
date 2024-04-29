@@ -39,7 +39,7 @@ class _CustomBodyState extends State<CustomBody> {
   late List<Map<String, dynamic>> catatanList = [];
   bool isLoading = true;
   int currentPage = 1;
-  int itemsPerPage = 6;
+  int itemsPerPage = 15;
   bool allDataLoaded = false;
   int availablePage = 1;
   late TextEditingController _searchController;
