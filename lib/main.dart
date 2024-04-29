@@ -125,6 +125,19 @@ class _CustomBodyState extends State<CustomBody> {
     fetchCatatanData();
   }
 
+  Widget _buildNoDataFound() {
+    return Center(
+      child: Text(
+        'Catatan yang Anda cari tidak ditemukan.',
+        style: TextStyle(
+          fontFamily: 'Nunito',
+          fontSize: 16.0,
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,6 +186,9 @@ class _CustomBodyState extends State<CustomBody> {
                                   setState(() {
                                     keyword = value;
                                   });
+                                },
+                                onSubmitted: (String value) {
+                                  _searchCatatanData(); // Call search function on "Enter" press
                                 },
                               ),
                             ),
@@ -241,6 +257,8 @@ class _CustomBodyState extends State<CustomBody> {
                     color: Color(0xFF31B057),
                   ),
                 )
+                    : catatanList.isEmpty
+                    ? _buildNoDataFound()
                     : LayoutBuilder(
                   builder: (context, constraints) {
                     final isMobile = constraints.maxWidth < 640;
@@ -252,12 +270,10 @@ class _CustomBodyState extends State<CustomBody> {
                         onNotification: _onScrollNotification,
                         child: isMobile
                             ? ListView.builder(
-                          padding:
-                          const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           itemCount: itemCount + (allDataLoaded ? 0 : 1),
                           itemBuilder: (context, index) {
-                            if (index == catatanList.length &&
-                                !allDataLoaded) {
+                            if (index == catatanList.length && !allDataLoaded) {
                               return _buildLoadingIndicator();
                             }
                             return index < catatanList.length
@@ -293,8 +309,7 @@ class _CustomBodyState extends State<CustomBody> {
                             )
                                 : null;
                           },
-                        )
-                    );
+                        ));
                   },
                 ),
               ),

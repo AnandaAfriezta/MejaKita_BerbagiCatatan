@@ -57,11 +57,11 @@ class _LoginPageState extends State<LoginPage> {
     if (data['messages'] == 'user.USER FOUND') {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('userData', jsonEncode(data));
-      print(jsonEncode(data));
 
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const MyApp()),
+            (Route<dynamic> route) => false, // Removes all routes in the stack
       );
     } else if (data['messages'] == 'common.PASSWORD_FAILED') {
       showDialog(

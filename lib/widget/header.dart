@@ -124,9 +124,10 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
     prefs.remove('userData');
 
     // Tambahkan logika untuk mereload halaman
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const MyApp()),
+          (Route<dynamic> route) => false, // Removes all routes in the stack
     );
   }
 
