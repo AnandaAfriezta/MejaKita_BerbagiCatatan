@@ -143,20 +143,14 @@ class _AddCatatanPageState extends State<AddCatatanPage> {
       request.headers.addAll({
         'Authorization': 'Bearer $token',
       });
-
-      print('Uploading catatan...');
       var response = await request.send();
-      print('Response status code: ${response.statusCode}');
-
       if (response.statusCode == 201) {
-        print('Catatan successfully uploaded');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MyApp()),
         );
       } else {
         final responseString = await response.stream.bytesToString();
-        print('Error message: $responseString');
 
         if (responseString.contains('"message":"Title is already defined"')) {
           setState(() {
